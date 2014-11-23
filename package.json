@@ -1,0 +1,25 @@
+{
+  "name": "file-system",
+  "version": "1.0.0",
+  "description": "Strengthen the ability of file system",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/douzi8/file-system"
+  },
+  "keywords": [
+    "file",
+    "ecursive",
+    "fs",
+    "maker"
+  ],
+  "author": "douzi <liaowei08@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/douzi8/file-system/issues"
+  },
+  "homepage": "https://github.com/douzi8/file-system"
+}
