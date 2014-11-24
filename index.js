@@ -205,7 +205,9 @@ exports.recurse = function(dirpath, filter, callback) {
               recurse(filepath);
             } else {
               if (filterReg) {
-                if (filterReg.test(filepath)) {
+                // Normalize \\ paths to / paths.
+                var _filepath = util.path.unixifyPath(filepath);
+                if (filterReg.test(_filepath)) {
                   callback(filepath, filename);
                 }
               } else {

@@ -10,7 +10,6 @@ function getPath(filepath) {
 
 function checkPermission(filepath, mask) {
   var stat = fs.statSync(filepath);
-
   var mode = mask & parseInt((stat.mode & parseInt ("777", 8)).toString (8)[0]);
 
   return !!mode;

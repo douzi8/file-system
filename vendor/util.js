@@ -85,8 +85,18 @@ if (isWindows) {
     // UNC paths are always absolute
     return !!result[2] || isUnc;
   };
+
+  // Normalize \\ paths to / paths.
+  exports.path.unixifyPath = function(filepath) {
+    return filepath.replace(/\\/g, '/');
+  };
+
 } else {
   exports.path.isAbsolute = function(filepath) {
     return filepath.charAt(0) === '/';
+  };
+
+  exports.path.unixifyPath = function(filepath) {
+    return filepath;
   };
 }

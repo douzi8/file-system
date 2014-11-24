@@ -29,7 +29,7 @@ The api is same as node's writeFile
 The api is same as node's writeFile
 
 ### file.recurse
-Recurse into a directory, executing callback for each file.
+Recurse into a directory, executing callback for each file.  
 And you can pass filter params for filter file.
 ```js
 file.recurse('path', function(filepath, filename) { });
