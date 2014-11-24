@@ -21,7 +21,7 @@ function checkCbAndOpts(options, callback) {
     return {
       options: null,
       callback: util.noop
-    }
+    };
   }
 }
 
@@ -43,6 +43,7 @@ function getDirs(filepath) {
  * @example
  * ```js
  *   fs.mkdir('1/2/3/4/5', 511);
+ *   fs.mkdir('path/2/3', function(err) {});
  * ```
  */
 exports.mkdir = function(filepath, mode, callback) {
@@ -93,7 +94,7 @@ exports.mkdir = function(filepath, mode, callback) {
 
  create.count = 0;
  create(filepath);
-}
+};
 
 /**
  * @description
@@ -120,7 +121,7 @@ exports.mkdirSync = function(filepath, mode) {
 
     fs.mkdirSync(filepath, mode);
   });
-}
+};
 
 /**
  * @description 
@@ -143,4 +144,40 @@ exports.writeFile = function(filename, data, options, callback) {
   exports.mkdir(dirname, function() {
     fs.writeFile(filename, data, options, callback);
   });
-}
+};
+
+/**
+ * @description
+ * Same as writeFile, but it is synchronous
+ */
+exports.writeFileSync = function(filename, data, options) {
+  var dirname = path.dirname(filename);
+
+  exports.mkdirSync(dirname);
+  fs.writeFile(filename, data, options);
+};
+
+/**
+ * @description
+ * Recurse into a directory, executing callback for each file.
+ * and it is asynchronous
+ * @example
+ * file.recurse('path', function(filepath, filename) { });
+ */
+exports.recurse = function(dirpath, callback) {
+  fs.readdir(dirpath, function(err, files) {
+    if (err) return callback(err);
+
+    files.forEach(function(filename) {
+      var filepath = path.join(dirpath, filename);
+
+      fs.stat(filepath, function(err, stats) {
+        if (stats.isDirectory()) {
+          exports.recurse(filepath, callback);
+        } else {
+          callback(filepath, filename);
+        }
+      });
+    });
+  });
+};

@@ -18,7 +18,7 @@ function extend(target, source) {
   var value;
 
   for (var key in source) {
-    var value = source[key];
+    value = source[key];
     if (Array.isArray(value)) {
       if (!Array.isArray(target[key])) {
         target[key] = [];
@@ -52,7 +52,7 @@ exports.noop = function() {};
 
 exports.isFunction = function(value) {
   return typeof value === 'function';
-}
+};
 
 exports.hrtime = function(time) {
   if (time) {
@@ -64,7 +64,7 @@ exports.hrtime = function(time) {
   } else {
     return process.hrtime();
   }
-}
+};
 
 exports.path = {};
 

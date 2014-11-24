@@ -4,8 +4,8 @@ This module make file opertaion apis simple, you don't need to care the dir exit
 ```js
 var file = require('file-system');
 
-file.mkdir('1/2/3/4/5');
-file.mkdirSync('1/2/3/4/5', [mode], function(err) {});
+file.mkdir('1/2/3/4/5', [mode], function(err) {});
+file.mkdirSync('1/2/3/4/5', [mode]);
 file.writeFile('path/test.txt', 'aaa', function(err) {})
 ```
 
