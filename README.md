@@ -24,3 +24,12 @@ The api is same as node's mkdir
 
 ### file.writeFile
 The api is same as node's writeFile
+
+### file.writeFileSync
+The api is same as node's writeFile
+
+### file.recurse
+Recurse into a directory, executing callback for each file.
+```js
+file.recurse('path', function(filepath, filename) { });
+```
