@@ -1,6 +1,6 @@
 {
   "name": "file-system",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Strengthen the ability of file system",
   "main": "index.js",
   "scripts": {

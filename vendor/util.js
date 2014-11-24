@@ -54,6 +54,10 @@ exports.isFunction = function(value) {
   return typeof value === 'function';
 };
 
+exports.isString = function(value) {
+  return typeof value === 'string';
+};
+
 exports.hrtime = function(time) {
   if (time) {
     var spend = process.hrtime(time);

@@ -1,6 +1,6 @@
 ## file-system
 Strengthen the ability of file system.
-This module make file opertaion apis simple, you don't need to care the dir exits. and the api is same as node's filesystem. This is no exists time cost.  
+This module make file opertaion apis simple, you don't need to care the dir exits. and the api is same as node's filesystem. This is no exists time cost for this plugin.  
 ```js
 var file = require('file-system');
 
@@ -30,6 +30,9 @@ The api is same as node's writeFile
 
 ### file.recurse
 Recurse into a directory, executing callback for each file.
+And you can pass filter params for filter file.
 ```js
 file.recurse('path', function(filepath, filename) { });
+
+file.recurse('path', ['*.js', 'path/**\/*.html'], function(filepath, filename) { });
 ```

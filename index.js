@@ -35,6 +35,27 @@ function getDirs(filepath) {
   }
 }
 
+function filterToReg(filter) {
+  if (!filter) return null;
+  if (util.isString(filter)) {
+    filter = [filter];
+  }
+  var ret = [];
+
+  filter.forEach(function(item) {
+    item = item
+      .replace(/\*\.([^\/]+)$/, '[^/]+.$1$')
+      .replace('**\/', '([^/]+\/)*')
+      .replace(/([\/\.])/g, '\\$1');
+
+    ret.push('(' + item + ')');
+  });
+
+  var reg = new RegExp(ret.join('|'));
+
+  return reg;
+}
+
 /**
  * @description
  * Create dir, if dir don't exists, it will not throw error.
@@ -163,21 +184,38 @@ exports.writeFileSync = function(filename, data, options) {
  * and it is asynchronous
  * @example
  * file.recurse('path', function(filepath, filename) { });
+ * file.recurse('path', ['*.js', 'path/**\/*.html'], function(filepath, filename) { });
  */
-exports.recurse = function(dirpath, callback) {
-  fs.readdir(dirpath, function(err, files) {
-    if (err) return callback(err);
+exports.recurse = function(dirpath, filter, callback) {
+  if (util.isFunction(filter)) {
+    callback = filter;
+    filter = null; 
+  }
+  var filterReg = filterToReg(filter);
 
-    files.forEach(function(filename) {
-      var filepath = path.join(dirpath, filename);
+  function recurse(dirpath) {
+    fs.readdir(dirpath, function(err, files) {
+      if (err) return callback(err);
 
-      fs.stat(filepath, function(err, stats) {
-        if (stats.isDirectory()) {
-          exports.recurse(filepath, callback);
-        } else {
-          callback(filepath, filename);
-        }
-      });
+      files.forEach(function(filename) {
+        var filepath = path.join(dirpath, filename);
+
+        fs.stat(filepath, function(err, stats) {
+            if (stats.isDirectory()) {
+              recurse(filepath);
+            } else {
+              if (filterReg) {
+                if (filterReg.test(filepath)) {
+                  callback(filepath, filename);
+                }
+              } else {
+                callback(filepath, filename);
+              }
+            }
+          });
+        });
     });
-  });
+  }
+
+  recurse(dirpath);
 };

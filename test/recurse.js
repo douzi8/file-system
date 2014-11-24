@@ -9,24 +9,60 @@ function getPath(filepath) {
 }
 
 describe('recurse', function() {
+  var allFiles = [
+    [
+      getPath('var/recurse/simple/1/1.html'),
+      getPath('var/recurse/simple/1/2.html'),
+      getPath('var/recurse/simple/1.html')
+    ],
+    [
+      getPath('var/recurse/filter/1/demo.js'),
+      getPath('var/recurse/filter/1/2/demo.js'),
+      getPath('var/recurse/filter/1/2/demo.css'),
+      getPath('var/recurse/filter/1/2/demo.html'),
+      getPath('var/recurse/filter/demo.html'),
+      getPath('var/recurse/filter/demo.js'),
+      getPath('var/recurse/filter/demo.css')
+    ]
+  ];
+
   before(function() {
-    file.writeFileSync(getPath('var/recurse/1/1.html'));
-    file.writeFileSync(getPath('var/recurse/1/2.html'));
-    file.writeFileSync(getPath('var/recurse/1.html'));
+    allFiles.forEach(function(files) {
+      files.forEach(function(item) {
+        file.writeFileSync(item);
+      });
+    });
   });
 
   it('recurse files', function(done) {
-    var files = [
-      getPath('var/recurse/1/1.html'),
-      getPath('var/recurse/1/2.html'),
-      getPath('var/recurse/1.html')
-    ];
+    var filesPath = allFiles[0];
     var count = 0;
 
-    file.recurse(getPath('var/recurse'), function(filepath, filename) {
-      assert.equal(true, files.indexOf(filepath) != -1);
+    file.recurse(getPath('var/recurse/simple'), function(filepath, filename) {
+      assert.equal(true, filesPath.indexOf(filepath) != -1);
       
-      if (++count == files.length) {
+      if (++count == filesPath.length) {
+        done();
+      }
+    });
+  });
+
+  it('filter params', function(done) {
+    var count = 0;
+    var filterPath = [
+      getPath('var/recurse/filter/1/demo.js'),
+      getPath('var/recurse/filter/1/2/demo.js'),
+      getPath('var/recurse/filter/1/2/demo.css'),
+      getPath('var/recurse/filter/demo.js')
+    ];
+
+    file.recurse(getPath('var/recurse/filter'), [
+      '*.js',
+      '1/**/*.css'
+    ], function(filepath, filename) {
+      assert.equal(true, filterPath.indexOf(filepath) != -1);
+
+      if (++count == filterPath.length) {
         done();
       }
     });
