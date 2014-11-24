@@ -34,5 +34,16 @@ And you can pass filter params for filter file.
 ```js
 file.recurse('path', function(filepath, filename) { });
 
-file.recurse('path', ['*.js', 'path/**\/*.html'], function(filepath, filename) { });
+file.recurse('path', ['*.js', 'path/**/*.html'], function(filepath, filename) { });
+```
+
+### file.recurseSync
+```js
+var filesPath = file.recurseSync('path');
+var filesPath = file.recurseSync('path', ['*.js', 'path/**/*.html']);
+
+
+filesPath.forEach(function(item) {
+  
+});
 ```

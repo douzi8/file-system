@@ -47,7 +47,7 @@ describe('recurse', function() {
     });
   });
 
-  it('filter params', function(done) {
+  it('recurse filter files', function(done) {
     var count = 0;
     var filterPath = [
       getPath('var/recurse/filter/1/demo.js'),
@@ -66,6 +66,27 @@ describe('recurse', function() {
         done();
       }
     });
+  });
+
+  it('recurseSync files', function() {
+    var filesPath = file.recurseSync(getPath('var/recurse/filter'));
+
+     assert.equal(filesPath.length, allFiles[1].length);
+  });
+
+  it('recurseSync filter files', function() {
+    var filesPath = file.recurseSync(getPath('var/recurse/filter'), [
+      '*.js',
+      '1/**/*.css'
+    ]);
+    var filterPath = [
+      getPath('var/recurse/filter/1/demo.js'),
+      getPath('var/recurse/filter/1/2/demo.js'),
+      getPath('var/recurse/filter/1/2/demo.css'),
+      getPath('var/recurse/filter/demo.js')
+    ];
+
+     assert.deepEqual(filesPath, filesPath);
   });
 
   after(function() {

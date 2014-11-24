@@ -221,3 +221,40 @@ exports.recurse = function(dirpath, filter, callback) {
 
   recurse(dirpath);
 };
+
+/**
+ * @description
+ * Same as recurse, but it is synchronous
+ * @returns {Array} selected files path.
+ * @example
+ * var filesPath = file.recurseSync('path');
+ * var filesPath = file.recurseSync('path', ['*.js', 'path/**\/*.html']);
+ */
+exports.recurseSync = function(dirpath, filter) {
+  var filterReg = filterToReg(filter);
+  var filesPath = [];
+
+  function recurse(dirpath) {
+    fs.readdirSync(dirpath).forEach(function(file) {
+      var filepath = path.join(dirpath, file);
+      var stats = fs.statSync(filepath);
+
+      if (stats.isDirectory()) {
+        recurse(filepath);
+      } else {
+        if (filterReg) {
+          var _filepath = util.path.unixifyPath(filepath);
+          if (filterReg.test(_filepath)) {
+            filesPath.push(filepath);
+          }
+        } else {
+          filesPath.push(filepath);
+        }
+      }
+    });
+  }
+
+  recurse(dirpath);
+
+  return filesPath;
+};
