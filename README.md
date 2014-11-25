@@ -58,7 +58,7 @@ file.recurseSync('path', ['*.js', 'path/**/*.html'], function(filepath, filename
 
 ### file.rmdirSync
 Recurse into a directory, remove all of the files and folder in this directory.
-it also can delete file
+it also can delete file.
 ```js
 file.rmdirSync('path');
 file.rmdirSync('path/file.txt');
