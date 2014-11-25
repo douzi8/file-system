@@ -58,6 +58,10 @@ exports.isString = function(value) {
   return typeof value === 'string';
 };
 
+exports.isUndefined = function(value) {
+  return typeof value == 'undefined';
+};
+
 exports.hrtime = function(time) {
   if (time) {
     var spend = process.hrtime(time);

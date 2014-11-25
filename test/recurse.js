@@ -39,10 +39,12 @@ describe('recurse', function() {
     var count = 0;
 
     file.recurse(getPath('var/recurse/simple'), function(filepath, filename) {
-      assert.equal(true, filesPath.indexOf(filepath) != -1);
-      
-      if (++count == filesPath.length) {
-        done();
+      if (filename) {
+        assert.equal(true, filesPath.indexOf(filepath) != -1);
+        
+        if (++count == filesPath.length) {
+          done();
+        }
       }
     });
   });
@@ -60,38 +62,46 @@ describe('recurse', function() {
       '*.js',
       '1/**/*.css'
     ], function(filepath, filename) {
-      assert.equal(true, filterPath.indexOf(filepath) != -1);
+      if (filename) {
+        assert.equal(true, filterPath.indexOf(filepath) != -1);
 
-      if (++count == filterPath.length) {
-        done();
+        if (++count == filterPath.length) {
+          done();
+        }
       }
     });
   });
 
   it('recurseSync files', function() {
-    var filesPath = file.recurseSync(getPath('var/recurse/filter'));
+    var filesPath = [];
+    file.recurseSync(getPath('var/recurse/filter'), function(filepath, filename) {
+      if (filename) {
+        filesPath.push(filepath);
+      }
+    });
 
      assert.equal(filesPath.length, allFiles[1].length);
   });
 
   it('recurseSync filter files', function() {
-    var filesPath = file.recurseSync(getPath('var/recurse/filter'), [
-      '*.js',
+    var filesPath = [];
+    file.recurseSync(getPath('var/recurse/filter'), [
+      'demo.js',
       '1/**/*.css'
-    ]);
+    ], function(filepath, filename) {
+      if (filename) {
+        filesPath.push(filepath);
+      }
+    });
     var filterPath = [
-      getPath('var/recurse/filter/1/demo.js'),
-      getPath('var/recurse/filter/1/2/demo.js'),
       getPath('var/recurse/filter/1/2/demo.css'),
       getPath('var/recurse/filter/demo.js')
     ];
 
-     assert.deepEqual(filesPath, filesPath);
+     assert.deepEqual(filesPath, filterPath);
   });
 
   after(function() {
-    grunt.file.delete(getPath('var/recurse/'), {
-      force: true
-    });
+    file.rmdirSync(getPath('var/recurse'));
   });
 });

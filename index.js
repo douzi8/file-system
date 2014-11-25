@@ -43,10 +43,14 @@ function filterToReg(filter) {
   var ret = [];
 
   filter.forEach(function(item) {
-    item = item
-      .replace(/\*\.([^\/]+)$/, '[^/]+.$1$')
+    item = (item + '$')
+      .replace(/\*\.([^\/]+)/, '[^/]+.$1')
       .replace('**\/', '([^/]+\/)*')
       .replace(/([\/\.])/g, '\\$1');
+
+    if (item.indexOf('/') == -1) {
+      item = '^' + item;
+    }
 
     ret.push('(' + item + ')');
   });
@@ -180,7 +184,8 @@ exports.writeFileSync = function(filename, data, options) {
 
 /**
  * @description
- * Recurse into a directory, executing callback for each file.
+ * Recurse into a directory, executing callback for each file and folder
+ * if the filename is undefiend, the callback is for folder, otherwise for file.
  * and it is asynchronous
  * @example
  * file.recurse('path', function(filepath, filename) { });
@@ -189,9 +194,10 @@ exports.writeFileSync = function(filename, data, options) {
 exports.recurse = function(dirpath, filter, callback) {
   if (util.isFunction(filter)) {
     callback = filter;
-    filter = null; 
+    filter = null;
   }
   var filterReg = filterToReg(filter);
+  var rootpath = dirpath;
 
   function recurse(dirpath) {
     fs.readdir(dirpath, function(err, files) {
@@ -203,10 +209,13 @@ exports.recurse = function(dirpath, filter, callback) {
         fs.stat(filepath, function(err, stats) {
             if (stats.isDirectory()) {
               recurse(filepath);
+              callback(filepath);
             } else {
               if (filterReg) {
                 // Normalize \\ paths to / paths.
-                var _filepath = util.path.unixifyPath(filepath);
+                var relative = path.relative(rootpath, filepath);
+                var _filepath = util.path.unixifyPath(relative);
+
                 if (filterReg.test(_filepath)) {
                   callback(filepath, filename);
                 }
@@ -225,36 +234,72 @@ exports.recurse = function(dirpath, filter, callback) {
 /**
  * @description
  * Same as recurse, but it is synchronous
- * @returns {Array} selected files path.
  * @example
- * var filesPath = file.recurseSync('path');
- * var filesPath = file.recurseSync('path', ['*.js', 'path/**\/*.html']);
+ * file.recurseSync('path', function(filepath, filename) {});
+ * file.recurseSync('path', ['*.js', 'path/**\/*.html'], function(filepath, filename) {});
  */
-exports.recurseSync = function(dirpath, filter) {
+exports.recurseSync = function(dirpath, filter, callback) {
+  if (util.isFunction(filter)) {
+    callback = filter;
+    filter = null;
+  }
   var filterReg = filterToReg(filter);
-  var filesPath = [];
+  var rootpath = dirpath;
 
   function recurse(dirpath) {
-    fs.readdirSync(dirpath).forEach(function(file) {
-      var filepath = path.join(dirpath, file);
-      var stats = fs.statSync(filepath);
+    // permission bug
+    try {
+      fs.readdirSync(dirpath).forEach(function(filename) {
+        var filepath = path.join(dirpath, filename);
+        var stats = fs.statSync(filepath);
 
-      if (stats.isDirectory()) {
-        recurse(filepath);
-      } else {
-        if (filterReg) {
-          var _filepath = util.path.unixifyPath(filepath);
-          if (filterReg.test(_filepath)) {
-            filesPath.push(filepath);
-          }
+        if (stats.isDirectory()) {
+          recurse(filepath);
+          callback(filepath);
         } else {
-          filesPath.push(filepath);
+          if (filterReg) {
+           var relative = path.relative(rootpath, filepath);
+           var _filepath = util.path.unixifyPath(relative);
+            
+            if (filterReg.test(_filepath)) {
+             callback(filepath, filename);
+            }
+          } else {
+            callback(filepath, filename);
+          }
         }
-      }
-    });
+      });
+    } catch(e) {
+      fs.chmodSync(dirpath, 511);
+      recurse(dirpath);
+    }
   }
 
   recurse(dirpath);
+};
 
-  return filesPath;
+/**
+ * @description
+ * Remove file or all files in folder
+ * @example
+ * file.rmdirSync('path');
+ * file.rmdirSync('path/file.txt');
+ */
+exports.rmdirSync = function(dirpath) {
+  var stats = fs.statSync(dirpath);
+
+  if (stats.isFile()) {
+    fs.unlinkSync(dirpath);
+  } else {
+    exports.recurseSync(dirpath, function(filepath, filename) {
+      // it is file, otherwise it's folder
+      if (filename) {
+        fs.unlinkSync(filepath);
+      } else {
+        fs.rmdirSync(filepath);
+      }
+    });
+
+    fs.rmdirSync(dirpath);
+  }
 };

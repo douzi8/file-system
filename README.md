@@ -29,21 +29,28 @@ The api is same as node's writeFile
 The api is same as node's writeFile
 
 ### file.recurse
-Recurse into a directory, executing callback for each file.  
+Recurse into a directory, executing callback for each file and folder.
+if the filename is undefiend, the callback is for folder, otherwise for file.
 And you can pass filter params for filter file.
 ```js
 file.recurse('path', function(filepath, filename) { });
 
-file.recurse('path', ['*.js', 'path/**/*.html'], function(filepath, filename) { });
+file.recurse('path', ['*.js', 'path/**/*.html'], function(filepath, filename) {  
+  if (filename) {
+  // it's file
+  } else {
+  // it's folder
+  }
+});
 ```
 
 ### file.recurseSync
 ```js
-var filesPath = file.recurseSync('path');
-var filesPath = file.recurseSync('path', ['*.js', 'path/**/*.html']);
+file.recurseSync('path', function(filepath, filename) {
+  
+});
 
-
-filesPath.forEach(function(item) {
+file.recurseSync('path', ['*.js', 'path/**/*.html'], function(filepath, filename) {
   
 });
 ```

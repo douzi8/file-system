@@ -1,7 +1,6 @@
 var assert = require("assert");
 var file = require('../index');
 var fs = require('fs');
-var grunt = require('grunt');
 var path = require('path');
 
 function getPath(filepath) {
@@ -71,8 +70,6 @@ describe('mkdir', function() {
   });
 
   after(function() {
-    grunt.file.delete(getPath('var/mkdir'), {
-      force: true
-    });
+    file.rmdirSync(getPath('var/mkdir'));
   });
 });
