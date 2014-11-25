@@ -179,7 +179,7 @@ exports.writeFileSync = function(filename, data, options) {
   var dirname = path.dirname(filename);
 
   exports.mkdirSync(dirname);
-  fs.writeFile(filename, data, options);
+  fs.writeFileSync(filename, data, options);
 };
 
 /**
@@ -302,4 +302,75 @@ exports.rmdirSync = function(dirpath) {
 
     fs.rmdirSync(dirpath);
   }
+};
+
+/**
+ * @description
+ * Copy dirpath to destpath, pass process callback for each file hanlder
+ * @example
+ * file.copySync('path', 'dest');
+ * file.copySync('src', 'dest/src');
+ * file.copySync('path', 'dest', { process: function(contents, filepath) {} });
+ */
+exports.copySync = function(dirpath, destpath, options) {
+  var defaults = {
+    encoding: 'utf8',
+    filter: null,
+    process: function(contents) {
+      return contents;
+    }
+  };
+  options = util.extend(defaults, options || {});
+  var folders = [];
+  var files = [];
+
+  exports.recurseSync(dirpath, options.filter, function(filepath, filename) {
+    if (filename) {
+      files.push(filepath);
+    } else {
+      folders.push(filepath);
+    }
+  });
+
+  folders = folders.filter(function(item, index) {
+    var length = folders.length;
+
+    while(length--) {
+      var isSubdir = new RegExp('^' + item);
+
+      if (folders[length] != item && isSubdir.test(folders[length])) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  // if dirpath don't exists folder
+  if (!folders.length) {
+    fs.mkdirSync(destpath);
+  }
+
+  // first create dir
+  folders.forEach(function(folder) {
+    var relative = path.relative(dirpath, folder);
+
+    exports.mkdirSync(path.join(destpath, relative));
+  });
+
+  // write file
+  files.forEach(function(filepath) {
+    var contents = fs.readFileSync(filepath, {
+      encoding: options.encoding
+    });
+    contents = options.process(contents, filepath);
+
+    var relative = path.relative(dirpath, filepath);
+    var newPath = path.join(destpath, relative);
+
+
+    fs.writeFileSync(newPath, contents, {
+      encoding: options.encoding
+    });
+  }); 
 };

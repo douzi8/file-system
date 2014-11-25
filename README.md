@@ -63,3 +63,12 @@ it also can delete file.
 file.rmdirSync('path');
 file.rmdirSync('path/file.txt');
 ```
+
+### file.copySync
+Recurse into a directory, copy all files into dest
+```js
+file.copySync('path', 'dest');
+file.copySync('src', 'dest/src');
+file.copySync('src', 'dest/src', { filter: ['*.js', 'path/**/*.css'] });
+file.copySync('path', 'dest', { process: function(contents, filepath) {} });
+```
