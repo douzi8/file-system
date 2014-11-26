@@ -2,7 +2,6 @@ var util = require('util');
 var toString = Object.prototype.toString;
 var isWindows = process.platform === 'win32';
 
-
 function isObject(arg) {
   return toString.call(arg) == '[object Object]';
 }
@@ -38,7 +37,6 @@ function extend(target, source) {
 
   return target;
 }
-
 
 extend(exports, util);
 

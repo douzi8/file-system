@@ -60,6 +60,14 @@ function filterToReg(filter) {
   return reg;
 }
 
+util.extend(exports, fs);
+
+/**
+ * @description
+ * Assign node origin methods to fs
+ */
+exports.fs = fs;
+
 /**
  * @description
  * Create dir, if dir don't exists, it will not throw error.

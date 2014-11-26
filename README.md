@@ -11,10 +11,19 @@ file.writeFile('path/test.txt', 'aaa', function(err) {})
 
 ### install
 ```
-npm install file-system
+npm install file-system --save
 ```
 
 ## API
+### file.fs
+file extend node fs origin methods, and overwrite some methods with next list chart
+if you want to use origin method, choose file.fs[method]
+
+```
+file.existsSync === file.fs.existsSync    // true
+
+file.fs.mkdirSync       // orign method
+```
 
 ### file.mkdir
 The api is same as node's mkdir
@@ -42,6 +51,10 @@ file.recurse('path', ['*.js', 'path/**/*.html'], function(filepath, filename) {
   // it's folder
   }
 });
+//  Only using files
+file.recurse('path', function(filepath, filename) {  
+  if (!filename) return;
+});
 ```
 
 ### file.recurseSync
@@ -65,10 +78,17 @@ file.rmdirSync('path/file.txt');
 ```
 
 ### file.copySync
-Recurse into a directory, copy all files into dest
+Recurse into a directory, copy all files into dest.
+Pass options filter params to filter files
 ```js
 file.copySync('path', 'dest');
+
 file.copySync('src', 'dest/src');
+
 file.copySync('src', 'dest/src', { filter: ['*.js', 'path/**/*.css'] });
+
 file.copySync('path', 'dest', { process: function(contents, filepath) {} });
+
+//Handler self files
+file.copySync('path', 'path', { filter: ['*.html.js'], process: function(contents, filepath) {} });
 ```
