@@ -44,18 +44,29 @@ And you can pass filter params for filter file.
 ```js
 file.recurse('path', function(filepath, filename) { });
 
-file.recurse('path', ['*.js', 'path/**/*.html'], function(filepath, filename) {  
+file.recurse('path', [
+  '*.css',
+  '**/*.js', 
+  'path/*.html',
+  '!**/path/*.js'
+], function(filepath, filename) {  
   if (filename) {
   // it's file
   } else {
   // it's folder
   }
 });
+
 //  Only using files
 file.recurse('path', function(filepath, filename) {  
   if (!filename) return;
 });
 ```
+#### filter description
+* `*.js`  only match js files in current dir.
+* `**/*.js` match all js files.
+* `path/*.js` match js files in path.
+* `!*.js` exclude js files in current dir.
 
 ### file.recurseSync
 Same as recurse, but it is synchronous
@@ -64,7 +75,7 @@ file.recurseSync('path', function(filepath, filename) {
   
 });
 
-file.recurseSync('path', ['*.js', 'path/**/*.html'], function(filepath, filename) {
+file.recurseSync('path', ['**/*.js', 'path/**/*.html'], function(filepath, filename) {
   
 });
 ```

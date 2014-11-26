@@ -35,7 +35,7 @@ describe('copy', function() {
 
     file.copySync(dirpath, destpath, {
       filter: [
-        '*.js',
+        '**/*.js',
         '1/**/*.css',
         '1/demo.html'
       ]

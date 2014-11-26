@@ -34,30 +34,56 @@ function getDirs(filepath) {
     return filepath.split('/');
   }
 }
-
+/**
+ * @description
+ * @example
+ * `*.js`  only match current dir files
+ * '**\/*.js' match all js files
+ * 'path/*.js' match js files in path
+ * '!*.js' exclude js files 
+ */
 function filterToReg(filter) {
   if (!filter) return null;
   if (util.isString(filter)) {
     filter = [filter];
   }
-  var ret = [];
+  var match = [];
+  var negate = [];
 
   filter.forEach(function(item) {
-    item = (item + '$')
-      .replace(/\*\.([^\/]+)/, '[^/]+.$1')
+    var isNegate = item.indexOf('!') === 0;
+    item = item
+      .replace(/^!/, '')
+      .replace(/\*(?![\/*])/, '[^/]*?')
       .replace('**\/', '([^/]+\/)*')
       .replace(/([\/\.])/g, '\\$1');
 
-    if (item.indexOf('/') == -1) {
-      item = '^' + item;
-    }
+    item = '(^' + item + '$)';
 
-    ret.push('(' + item + ')');
+    if (isNegate) {
+      negate.push(item);
+    } else {
+      match.push(item);
+    }
   });
 
-  var reg = new RegExp(ret.join('|'));
+  match = match.length ?  new RegExp(match.join('|')) : null;
+  negate = negate.length ? new RegExp(negate.join('|')) : null;
 
-  return reg;
+  return function(filepath) {
+    // Normalize \\ paths to / paths.
+    filepath = util.path.unixifyPath(filepath);
+
+    if (negate && negate.test(filepath)) {
+      return false;
+    }
+
+    if (match && match.test(filepath)) {
+      return true;
+    }
+
+    return false;
+  };
 }
 
 util.extend(exports, fs);
@@ -204,7 +230,7 @@ exports.recurse = function(dirpath, filter, callback) {
     callback = filter;
     filter = null;
   }
-  var filterReg = filterToReg(filter);
+  var filterCb = filterToReg(filter);
   var rootpath = dirpath;
 
   function recurse(dirpath) {
@@ -219,12 +245,9 @@ exports.recurse = function(dirpath, filter, callback) {
               recurse(filepath);
               callback(filepath);
             } else {
-              if (filterReg) {
-                // Normalize \\ paths to / paths.
+              if (filterCb) {
                 var relative = path.relative(rootpath, filepath);
-                var _filepath = util.path.unixifyPath(relative);
-
-                if (filterReg.test(_filepath)) {
+                if (filterCb(relative)) {
                   callback(filepath, filename);
                 }
               } else {
@@ -251,7 +274,7 @@ exports.recurseSync = function(dirpath, filter, callback) {
     callback = filter;
     filter = null;
   }
-  var filterReg = filterToReg(filter);
+  var filterCb = filterToReg(filter);
   var rootpath = dirpath;
 
   function recurse(dirpath) {
@@ -265,11 +288,9 @@ exports.recurseSync = function(dirpath, filter, callback) {
           recurse(filepath);
           callback(filepath);
         } else {
-          if (filterReg) {
+          if (filterCb) {
            var relative = path.relative(rootpath, filepath);
-           var _filepath = util.path.unixifyPath(relative);
-            
-            if (filterReg.test(_filepath)) {
+            if (filterCb(relative)) {
              callback(filepath, filename);
             }
           } else {

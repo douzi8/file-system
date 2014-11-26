@@ -57,29 +57,6 @@ describe('recurse', function() {
     });
   });
 
-  it('recurse filter files', function(done) {
-    var count = 0;
-    var filterPath = [
-      getPath('var/recurse/filter/1/demo.js'),
-      getPath('var/recurse/filter/1/2/demo.js'),
-      getPath('var/recurse/filter/1/2/demo.css'),
-      getPath('var/recurse/filter/demo.js')
-    ];
-
-    file.recurse(getPath('var/recurse/filter'), [
-      '*.js',
-      '1/**/*.css'
-    ], function(filepath, filename) {
-      if (filename) {
-        assert.equal(true, filterPath.indexOf(filepath) != -1);
-
-        if (++count == filterPath.length) {
-          done();
-        }
-      }
-    });
-  });
-
   it('recurseSync files', function() {
     var filesPath = [];
     file.recurseSync(getPath('var/recurse/filter'), function(filepath, filename) {
