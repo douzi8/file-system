@@ -100,12 +100,14 @@ file.copySync('src', 'dest/src');
 
 file.copySync('src', 'dest/src', { filter: ['*.js', 'path/**/*.css'] });
 
-file.copySync('path', 'dest', { process: function(contents, filepath) {
-  return {
-    contents: '',
-    filepath: ''
-  };
-} });
+file.copySync('path', 'dest', { 
+  process: function(contents, filepath) {
+    return {
+      contents: '',
+      filepath: ''
+    };
+  } 
+});
 
 //Handler self files
 file.copySync('path', 'path', { filter: ['*.html.js'], process: function(contents, filepath) {} });
