@@ -333,11 +333,11 @@ exports.rmdirSync = function(dirpath) {
   }
 };
 
-
-
 /**
  * @description
  * Copy dirpath to destpath, pass process callback for each file hanlder
+ * if you want to change the dest filepath, process callback return { contents: '', filepath: ''}
+ * otherwise only change contents
  * @example
  * file.copySync('path', 'dest');
  * file.copySync('src', 'dest/src');
@@ -396,13 +396,20 @@ exports.copySync = function(dirpath, destpath, options) {
     var contents = fs.readFileSync(filepath, {
       encoding: options.encoding
     });
-    contents = options.process(contents, filepath);
+    var result = options.process(contents, filepath);
 
-    var relative = path.relative(dirpath, filepath);
+    // change file formate
+    if (util.isString(result)) {
+      result = {
+        contents: result,
+        filepath: filepath
+      };
+    }
+
+    var relative = path.relative(dirpath, result.filepath);
     var newPath = path.join(destpath, relative);
 
-
-    fs.writeFileSync(newPath, contents, {
+    fs.writeFileSync(newPath, result.contents, {
       encoding: options.encoding
     });
   }); 

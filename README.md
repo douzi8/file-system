@@ -90,7 +90,9 @@ file.rmdirSync('path/file.txt');
 
 ### file.copySync
 Recurse into a directory, copy all files into dest.
-Pass options filter params to filter files
+Pass options filter params to filter files.
+if you want to change the dest filepath, process callback return { contents: '', filepath: ''},
+otherwise only change contents.
 ```js
 file.copySync('path', 'dest');
 
@@ -98,7 +100,12 @@ file.copySync('src', 'dest/src');
 
 file.copySync('src', 'dest/src', { filter: ['*.js', 'path/**/*.css'] });
 
-file.copySync('path', 'dest', { process: function(contents, filepath) {} });
+file.copySync('path', 'dest', { process: function(contents, filepath) {
+  return {
+    contents: '',
+    filepath: ''
+  };
+} });
 
 //Handler self files
 file.copySync('path', 'path', { filter: ['*.html.js'], process: function(contents, filepath) {} });
