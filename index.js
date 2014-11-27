@@ -309,7 +309,7 @@ exports.recurseSync = function(dirpath, filter, callback) {
 
 /**
  * @description
- * Remove file or all files in folder
+ * Remove folder and files in folder, but it's synchronous
  * @example
  * file.rmdirSync('path');
  * file.rmdirSync('path/file.txt');
@@ -332,6 +332,8 @@ exports.rmdirSync = function(dirpath) {
     fs.rmdirSync(dirpath);
   }
 };
+
+
 
 /**
  * @description
@@ -365,9 +367,11 @@ exports.copySync = function(dirpath, destpath, options) {
     var length = folders.length;
 
     while(length--) {
-      var isSubdir = new RegExp('^' + item);
+      var newItem = folders[length];
+      var isSubdir = newItem.indexOf(item) === 0;
+      var notSamelevel = newItem.split(path.sep).length != item.split(path.sep).length;
 
-      if (folders[length] != item && isSubdir.test(folders[length])) {
+      if (isSubdir && notSamelevel) {
         return false;
       }
     }
