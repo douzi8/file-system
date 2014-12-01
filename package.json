@@ -28,5 +28,8 @@
     "grunt": "^0.4.5",
     "grunt-contrib-jshint": "^0.10.0",
     "mocha": "^2.0.1"
+  },
+  "dependencies": {
+    "utils-extend": "^1.0.4"
   }
 }

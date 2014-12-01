@@ -3,7 +3,7 @@
  * @author wliao <wliao@Ctrip.com> 
  */
 var fs = require('fs');
-var util = require('./vendor/util');
+var util = require('utils-extend');
 var path = require('path');
 
 function checkCbAndOpts(options, callback) {
@@ -56,6 +56,23 @@ function filterToReg(filter) {
       .replace(/^!/, '')
       .replace(/\*(?![\/*])/, '[^/]*?')
       .replace('**\/', '([^/]+\/)*')
+      .replace(/\{([^\}]+)\}/g, function($1, $2) {
+        var collection = $2.split(',');
+        var length = collection.length;
+        var result = '(?:';
+
+        collection.forEach(function(item, index) {
+          result += '(' + item.trim() + ')';
+
+          if (index + 1 !== length) {
+            result += '|';
+          }
+        });
+
+        result += ')';
+
+        return result;
+      })
       .replace(/([\/\.])/g, '\\$1');
 
     item = '(^' + item + '$)';
@@ -177,7 +194,6 @@ exports.mkdirSync = function(filepath, mode) {
 
   dirs.slice(length + 1).forEach(function(item) {
     filepath = path.join(filepath, item);
-
     fs.mkdirSync(filepath, mode);
   });
 };
@@ -342,14 +358,13 @@ exports.rmdirSync = function(dirpath) {
  * file.copySync('path', 'dest');
  * file.copySync('src', 'dest/src');
  * file.copySync('path', 'dest', { process: function(contents, filepath) {} });
+ * file.copySync('path', 'dest', { process: function(contents, filepath) {} }, noProcess: ['']);
  */
 exports.copySync = function(dirpath, destpath, options) {
   var defaults = {
     encoding: 'utf8',
     filter: null,
-    process: function(contents) {
-      return contents;
-    }
+    noProcess: ''
   };
   options = util.extend(defaults, options || {});
   var folders = [];
@@ -381,7 +396,7 @@ exports.copySync = function(dirpath, destpath, options) {
 
   // if dirpath don't exists folder
   if (!folders.length) {
-    fs.mkdirSync(destpath);
+    exports.mkdirSync(destpath);
   }
 
   // first create dir
@@ -391,26 +406,43 @@ exports.copySync = function(dirpath, destpath, options) {
     exports.mkdirSync(path.join(destpath, relative));
   });
 
+  var noProcessCb = filterToReg(options.noProcess);
+  
   // write file
   files.forEach(function(filepath) {
-    var contents = fs.readFileSync(filepath, {
-      encoding: options.encoding
-    });
-    var result = options.process(contents, filepath);
-
-    // change file formate
-    if (util.isString(result)) {
-      result = {
-        contents: result,
-        filepath: filepath
-      };
+    var encoding = options.encoding;
+    var process = options.process;
+    
+    if (!options.process) {
+      encoding = null;
     }
 
-    var relative = path.relative(dirpath, result.filepath);
+    // Skip not process files
+    if (noProcessCb && noProcessCb(filepath)) {
+      encoding = null;
+      process = null;
+    }
+
+    var contents = fs.readFileSync(filepath, {
+      encoding: encoding
+    });
+
+    if (process) {
+      var result = process(contents, filepath);
+      // change file formate
+      if (util.isString(result)) {
+        contents = result;
+      } else {
+        contents = result.contents;
+        filepath = result.filepath;
+      }
+    }
+
+    var relative = path.relative(dirpath, filepath);
     var newPath = path.join(destpath, relative);
 
-    fs.writeFileSync(newPath, result.contents, {
-      encoding: options.encoding
+    fs.writeFileSync(newPath, contents, {
+      encoding: encoding
     });
   }); 
 };

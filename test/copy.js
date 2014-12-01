@@ -59,6 +59,38 @@ describe('copy', function() {
     assert.equal(result.length, dirDest.length);
   });
 
+  it('copySync replace filepath', function() {
+    var dirpath = getPath('var/copy/simple');
+    var destpath = getPath('var/copy/simple-replace');
+
+    file.copySync(dirpath, destpath, {
+      process: function(contents, filepath) {
+        var basename = path.basename(filepath);
+
+        // Replace html to txt
+        filepath = filepath.replace(
+          /\.html$/,
+          '.txt'
+        );
+
+        // Move all css to rootpath of destpath
+        if (/\.css$/.test(basename)) {
+          var prefix = path.basename(path.dirname(filepath));
+          filepath = path.join(destpath, prefix + '-' + basename);
+        }
+
+        return {
+          contents: contents,
+          filepath: filepath
+        };
+      }
+    });
+
+    assert.equal(true, fs.existsSync(
+      path.join(destpath, '1/demo.txt')
+    ));
+  });
+
   after(function() {
     file.rmdirSync(getPath('var/copy'));
   });

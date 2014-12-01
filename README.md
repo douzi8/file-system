@@ -67,6 +67,12 @@ file.recurse('path', function(filepath, filename) {
 * `**/*.js` match all js files.
 * `path/*.js` match js files in path.
 * `!*.js` exclude js files in current dir.
+* ``.{jpg,png,gif}`` means jpg, png or gif
+```
+'**/*'                 // Match all files
+'!**/*.js'             // Exclude all js files
+'**/*.{jpg,png,gif}'   // Match jpg, png, or gif files
+```
 
 ### file.recurseSync
 Same as recurse, but it is synchronous
@@ -101,6 +107,7 @@ file.copySync('src', 'dest/src');
 file.copySync('src', 'dest/src', { filter: ['*.js', 'path/**/*.css'] });
 
 file.copySync('path', 'dest', { 
+  noProcess: '**/*.{jpg, png}',            // Don't process images
   process: function(contents, filepath) {
     return {
       contents: '',
