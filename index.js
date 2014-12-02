@@ -27,12 +27,9 @@ function checkCbAndOpts(options, callback) {
 
 function getDirs(filepath) {
   filepath = filepath.replace(/\/$/, '').replace(/\\$/, '');
-
-  if (util.path.isAbsolute(filepath)) {
-    return filepath.split(path.sep);
-  } else {
-    return filepath.split('/');
-  }
+  filepath = util.path.unixifyPath(filepath);
+ 
+  return filepath.split('/');
 }
 /**
  * @description
