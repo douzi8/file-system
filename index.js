@@ -409,13 +409,14 @@ exports.copySync = function(dirpath, destpath, options) {
   files.forEach(function(filepath) {
     var encoding = options.encoding;
     var process = options.process;
+    var relative = path.relative(dirpath, filepath);
     
     if (!options.process) {
       encoding = null;
     }
 
     // Skip not process files
-    if (noProcessCb && noProcessCb(filepath)) {
+    if (noProcessCb && noProcessCb(relative)) {
       encoding = null;
       process = null;
     }
@@ -431,11 +432,10 @@ exports.copySync = function(dirpath, destpath, options) {
         contents = result;
       } else {
         contents = result.contents;
-        filepath = result.filepath;
+        relative = path.relative(dirpath, result.filepath);
       }
     }
 
-    var relative = path.relative(dirpath, filepath);
     var newPath = path.join(destpath, relative);
 
     fs.writeFileSync(newPath, contents, {

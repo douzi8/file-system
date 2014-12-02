@@ -24,7 +24,7 @@ describe('copy', function() {
   before(function() {
     allFiles.forEach(function(files) {
       files.forEach(function(item) {
-        file.writeFileSync(item);
+        file.writeFileSync(item, 'a');
       });
     });
   });
@@ -86,9 +86,48 @@ describe('copy', function() {
       }
     });
 
-    assert.equal(true, fs.existsSync(
+    assert.equal(true, file.existsSync(
       path.join(destpath, '1/demo.txt')
     ));
+  });
+
+  it('copySync with noProcess', function() {
+    var dirpath = getPath('var/copy/simple');
+    var destpath = getPath('var/copy/simple-noprocess');
+
+    file.copySync(dirpath, destpath, {
+      filter: [
+        '**/*demo.css',
+        '!**/1/demo.css'
+      ],
+      noProcess: 'demo.css',
+      process: function(contents, filepath) {
+        return 'b';
+      }
+    });
+
+    assert.equal(true, file.existsSync(
+      path.join(destpath, 'demo.css')
+    ));
+
+    assert.equal(false, file.existsSync(
+      path.join(destpath, '1/demo.css')
+    ));
+
+    assert.equal(true, file.existsSync(
+      path.join(destpath, '1/2/demo.css')
+    ));
+
+    assert.equal(true, file.existsSync(
+      path.join(destpath, 'file.js/demo.css')
+    ));
+
+    var content = file.readFileSync(
+      path.join(destpath, 'demo.css'),
+      { encoding: 'utf8' }
+    );
+
+    assert.equal('a',  content);
   });
 
   after(function() {
