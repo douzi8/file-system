@@ -30,6 +30,7 @@
     "mocha": "^2.0.1"
   },
   "dependencies": {
+    "file-match": "^1.0.1",
     "utils-extend": "^1.0.4"
   }
 }

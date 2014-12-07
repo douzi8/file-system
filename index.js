@@ -5,6 +5,7 @@
 var fs = require('fs');
 var util = require('utils-extend');
 var path = require('path');
+var fileMatch = require('file-match');
 
 function checkCbAndOpts(options, callback) {
   if (util.isFunction(options)) {
@@ -30,74 +31,6 @@ function getDirs(filepath) {
   filepath = util.path.unixifyPath(filepath);
  
   return filepath.split('/');
-}
-/**
- * @description
- * @example
- * `*.js`  only match current dir files
- * '**\/*.js' match all js files
- * 'path/*.js' match js files in path
- * '!*.js' exclude js files 
- */
-function filterToReg(filter) {
-  if (!filter) return null;
-  if (util.isString(filter)) {
-    filter = [filter];
-  }
-  var match = [];
-  var negate = [];
-
-  filter.forEach(function(item) {
-    var isNegate = item.indexOf('!') === 0;
-    item = item
-      .replace(/^!/, '')
-      .replace(/\*(?![\/*])/, '[^/]*?')
-      .replace('**\/', '([^/]+\/)*')
-      .replace(/\{([^\}]+)\}/g, function($1, $2) {
-        var collection = $2.split(',');
-        var length = collection.length;
-        var result = '(?:';
-
-        collection.forEach(function(item, index) {
-          result += '(' + item.trim() + ')';
-
-          if (index + 1 !== length) {
-            result += '|';
-          }
-        });
-
-        result += ')';
-
-        return result;
-      })
-      .replace(/([\/\.])/g, '\\$1');
-
-    item = '(^' + item + '$)';
-
-    if (isNegate) {
-      negate.push(item);
-    } else {
-      match.push(item);
-    }
-  });
-
-  match = match.length ?  new RegExp(match.join('|')) : null;
-  negate = negate.length ? new RegExp(negate.join('|')) : null;
-
-  return function(filepath) {
-    // Normalize \\ paths to / paths.
-    filepath = util.path.unixifyPath(filepath);
-
-    if (negate && negate.test(filepath)) {
-      return false;
-    }
-
-    if (match && match.test(filepath)) {
-      return true;
-    }
-
-    return false;
-  };
 }
 
 util.extend(exports, fs);
@@ -243,7 +176,7 @@ exports.recurse = function(dirpath, filter, callback) {
     callback = filter;
     filter = null;
   }
-  var filterCb = filterToReg(filter);
+  var filterCb = fileMatch(filter);
   var rootpath = dirpath;
 
   function recurse(dirpath) {
@@ -258,12 +191,8 @@ exports.recurse = function(dirpath, filter, callback) {
               recurse(filepath);
               callback(filepath);
             } else {
-              if (filterCb) {
-                var relative = path.relative(rootpath, filepath);
-                if (filterCb(relative)) {
-                  callback(filepath, filename);
-                }
-              } else {
+              var relative = path.relative(rootpath, filepath);
+              if (filterCb(relative)) {
                 callback(filepath, filename);
               }
             }
@@ -287,7 +216,7 @@ exports.recurseSync = function(dirpath, filter, callback) {
     callback = filter;
     filter = null;
   }
-  var filterCb = filterToReg(filter);
+  var filterCb = fileMatch(filter);
   var rootpath = dirpath;
 
   function recurse(dirpath) {
@@ -301,12 +230,8 @@ exports.recurseSync = function(dirpath, filter, callback) {
           recurse(filepath);
           callback(filepath);
         } else {
-          if (filterCb) {
-           var relative = path.relative(rootpath, filepath);
-            if (filterCb(relative)) {
-             callback(filepath, filename);
-            }
-          } else {
+          var relative = path.relative(rootpath, filepath);
+          if (filterCb(relative)) {
             callback(filepath, filename);
           }
         }
@@ -403,7 +328,7 @@ exports.copySync = function(dirpath, destpath, options) {
     exports.mkdirSync(path.join(destpath, relative));
   });
 
-  var noProcessCb = filterToReg(options.noProcess);
+  var noProcessCb = fileMatch(options.noProcess);
   
   // write file
   files.forEach(function(filepath) {
@@ -416,7 +341,7 @@ exports.copySync = function(dirpath, destpath, options) {
     }
 
     // Skip not process files
-    if (noProcessCb && noProcessCb(relative)) {
+    if (noProcessCb(relative)) {
       encoding = null;
       process = null;
     }
