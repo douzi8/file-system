@@ -110,3 +110,15 @@ file.copySync('path', 'dest', {
 //Handler self files
 file.copySync('path', 'path', { filter: ['*.html.js'], process: function(contents, filepath) {} });
 ```
+
+### file.base64
+Read image file, callback with base64 data
+```js
+file.base64('img.png', function(err, data) {
+  
+});
+```
+### file.base64Sync
+```js
+var base64 = file.base64Sync('img.png');
+```

@@ -1,6 +1,6 @@
 {
   "name": "file-system",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "description": "Strengthen the ability of file system",
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,8 @@
     "recurse",
     "fs",
     "maker",
-    "node file"
+    "node file",
+    "base64"
   ],
   "author": "douzi <liaowei08@gmail.com>",
   "license": "ISC",

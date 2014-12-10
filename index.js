@@ -368,3 +368,37 @@ exports.copySync = function(dirpath, destpath, options) {
     });
   }); 
 };
+
+function base64(filename, data) {
+   var extname = path.extname(filename).substr(1);
+  extname = extname || 'png';
+  var baseType = {
+    jpg: 'jpeg'
+  };
+  var type = baseType[extname] ? baseType[extname] : extname;
+
+  return 'data:image/' + type + ';base64,' + new Buffer(data, 'binary').toString('base64');
+}
+/**
+ * @description
+ * Get image file base64 data
+ */
+exports.base64 = function(filename, callback) {
+  if (!callback) callback = util.noop;
+
+  fs.readFile(filename, { encoding: 'binary' }, function(err, data) {
+    if (err) return callback(err);
+
+    callback(null, base64(filename, data));
+  });
+};
+
+/**
+ * @description
+ * The api same as base64, but it's synchronous
+ */
+exports.base64Sync = function(filename) {
+  var data = fs.readFileSync(filename);
+
+  return base64(filename, data);
+};

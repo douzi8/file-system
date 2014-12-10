@@ -5,7 +5,8 @@ module.exports = function(grunt) {
       all: [
         'test/**/*.js',
         'vendor/**/*.js',
-        './*.js'
+        './*.js',
+        '!./test.js'
       ]
     }
   });
