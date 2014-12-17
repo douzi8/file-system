@@ -130,7 +130,35 @@ describe('copy', function() {
     assert.equal('a',  content);
   });
 
+  it('copySync with clear true', function() {
+    var clearFiles = [
+      getPath('var/copy-clear/1/1.html'),
+      getPath('var/copy-clear/1/111'),
+      getPath('var/copy-clear/2'),
+      getPath('var/copy-clear/1/11/11.html'),
+      getPath('var/copy-clear/1/11/11')
+    ];
+
+    clearFiles.forEach(function(item) {
+      if (/\.\w+$/.test(item)) {
+        file.writeFileSync(item);
+      } else {
+        file.mkdirSync(item);
+      }
+    });
+
+    file.copySync(getPath('var/copy-clear'), getPath('var/copy-clear-dest'), {
+      clear: true
+    });
+
+    assert.equal(false, file.existsSync(getPath('var/copy-clear-dest/2')));
+    assert.equal(false, file.existsSync(getPath('var/copy-clear-dest/1/11/11')));
+    assert.equal(false, file.existsSync(getPath('var/copy-clear-dest/1/111')));
+  });
+
   after(function() {
     file.rmdirSync(getPath('var/copy'));
+    file.rmdirSync(getPath('var/copy-clear'));
+    file.rmdirSync(getPath('var/copy-clear-dest'));
   });
 });

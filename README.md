@@ -91,7 +91,7 @@ Pass options filter params to filter files.
 if you want to change the dest filepath, process callback return { contents: '', filepath: ''},
 otherwise only change contents.
 ```js
-file.copySync('path', 'dest');
+file.copySync('path', 'dest', { clear: true });
 
 file.copySync('src', 'dest/src');
 
@@ -110,6 +110,11 @@ file.copySync('path', 'dest', {
 //Handler self files
 file.copySync('path', 'path', { filter: ['*.html.js'], process: function(contents, filepath) {} });
 ```
+options
+* filter
+* process
+* clear [clear = false]  
+Should clear empty folder
 
 ### file.base64
 Read image file, callback with base64 data

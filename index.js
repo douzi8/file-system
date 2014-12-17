@@ -300,6 +300,17 @@ exports.copySync = function(dirpath, destpath, options) {
     }
   });
 
+  // Clear empty folder
+  if (options.clear) {
+    folders = folders.filter(function(item) {
+      var length = files.length;
+      while(length--) {
+        if (path.dirname(files[length]) === item) return true;
+      }
+      return false;
+    });
+  }
+
   folders = folders.filter(function(item, index) {
     var length = folders.length;
 
