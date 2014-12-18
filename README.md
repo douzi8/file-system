@@ -38,6 +38,9 @@ The api is same as node's writeFile
 ### file.writeFileSync
 The api is same as node's writeFile
 
+### file.fileMatch
+The api equal [file-match](https://github.com/douzi8/file-match)
+
 ### file.recurse
 Recurse into a directory, executing callback for each file and folder.
 if the filename is undefiend, the callback is for folder, otherwise for file.

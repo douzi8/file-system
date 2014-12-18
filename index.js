@@ -41,6 +41,8 @@ util.extend(exports, fs);
  */
 exports.fs = fs;
 
+exports.fileMatch = fileMatch;
+
 /**
  * @description
  * Create dir, if dir don't exists, it will not throw error.
