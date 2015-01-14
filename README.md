@@ -40,6 +40,16 @@ The api is same as node's writeFile
 
 ### file.fileMatch
 The api equal [file-match](https://github.com/douzi8/file-match)
+      
+### file.copyFile
+Asynchronously copy a file into newpath
+```
+file.copyFile('deom.png', 'dest/demo.png', {
+  done: function() {
+    console.log('done');
+  }
+});
+```
 
 ### file.copyFileSync
 Copy a file into newpath

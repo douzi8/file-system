@@ -146,6 +146,35 @@ exports.writeFileSync = function(filename, data, options) {
 
 /**
  * @description
+ * Asynchronously copy a file
+ * @example
+ * file.copyFile('demo.txt', 'demo.dest.txt', { done: function() { }})
+ */
+exports.copyFile = function(srcpath, destpath, options) {
+  options = util.extend({
+    encoding: 'utf8',
+    done: util.noop
+  }, options || {});
+
+  if (!options.process) {
+    options.encoding = null;
+  }
+
+  fs.readFile(srcpath, {
+    encoding: null
+  }, function(err, contents) {
+    if (err) return options.done(err);
+
+    if (options.process) {
+      contents = options.process(contents);
+    }
+
+    exports.writeFile(destpath, contents, options, options.done);
+  });
+};
+
+/**
+ * @description
  * Copy file to dest, if no process options, it will only copy file to dest
  * @example
  * file.copyFileSync('demo.txt', 'demo.dest.txt' { process: function(contents) { }});
