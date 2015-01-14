@@ -26,11 +26,14 @@ function checkCbAndOpts(options, callback) {
   }
 }
 
-function getDirs(filepath) {
-  filepath = filepath.replace(/\/$/, '').replace(/\\$/, '');
-  filepath = util.path.unixifyPath(filepath);
- 
-  return filepath.split('/');
+function getExists(filepath) {
+  var exists = fs.existsSync(filepath);
+
+  if (exists) {
+    return filepath;
+  } else {
+    return getExists(path.dirname(filepath));
+  }
 }
 
 util.extend(exports, fs);
@@ -45,18 +48,17 @@ exports.fileMatch = fileMatch;
 
 /**
  * @description
- * Create dir, if dir don't exists, it will not throw error.
- * And will mkdir for path, it is asynchronous.
+ * Create dir, if dir exist, it will only invoke callback.
  *
  * @example
  * ```js
  *   fs.mkdir('1/2/3/4/5', 511);
- *   fs.mkdir('path/2/3', function(err) {});
+ *   fs.mkdir('path/2/3', function() {});
  * ```
  */
 exports.mkdir = function(filepath, mode, callback) {
-  var dirs = getDirs(filepath);
-  var length = dirs.length;
+  var root = getExists(filepath);
+  var children  = path.relative(root, filepath);
 
   if (util.isFunction(mode)) {
     callback = mode;
@@ -69,30 +71,16 @@ exports.mkdir = function(filepath, mode, callback) {
 
   mode = mode || 511;
 
-  while(length--) {
-    exists = fs.existsSync(filepath);
-    if (exists) {
-      break;
-    } else {
-      item = dirs[length];
-      last = filepath.lastIndexOf(item);
-      filepath = filepath.slice(0, last);
-    }
-  }
+  if (!children) return callback();
 
-  dirs = dirs.slice(length + 1);
+  children = children.split(path.sep);
 
   function create(filepath) {
-    if (create.count == dirs.length) {
-      var err;
-      if (!create.count) {
-       err = new Error("EEXIST mkdir '" + filepath + "'");
-      }
-
-      return callback(err);
+    if (create.count === children.length) {
+      return callback();
     }
-    
-    filepath = path.join(filepath, dirs[create.count]);
+
+    filepath = path.join(filepath, children[create.count]);
 
     fs.mkdir(filepath, mode, function(err) {
       create.count++;
@@ -100,8 +88,8 @@ exports.mkdir = function(filepath, mode, callback) {
     });
   }
 
- create.count = 0;
- create(filepath);
+  create.count = 0;
+  create(root);
 };
 
 /**
@@ -109,24 +97,16 @@ exports.mkdir = function(filepath, mode, callback) {
  * Same as mkdir, but it is synchronous
  */
 exports.mkdirSync = function(filepath, mode) {
-  var dirs = getDirs(filepath);
-  var length = dirs.length;
-  var item, last, exists;
+  var root = getExists(filepath);
+  var children  = path.relative(root, filepath);
 
-  while(length--) {
-    exists = fs.existsSync(filepath);
-    if (exists) {
-      break;
-    } else {
-      item = dirs[length];
-      last = filepath.lastIndexOf(item);
-      filepath = filepath.slice(0, last);
-    }
-  }
+  if (!children) return;
 
-  dirs.slice(length + 1).forEach(function(item) {
-    filepath = path.join(filepath, item);
-    fs.mkdirSync(filepath, mode);
+  children = children.split(path.sep);
+
+  children.forEach(function(item) {
+    root = path.join(root, item);
+    fs.mkdirSync(root, mode);
   });
 };
 
@@ -166,6 +146,29 @@ exports.writeFileSync = function(filename, data, options) {
 
 /**
  * @description
+ * Copy file to dest, if no process options, it will only copy file to dest
+ * @example
+ * file.copyFileSync('demo.txt', 'demo.dest.txt' { process: function(contents) { }});
+ * file.copyFileSync('demo.png', 'dest.png');
+ */
+exports.copyFileSync = function(srcpath, destpath, options) {
+  options = util.extend({
+    encoding: 'utf8' 
+  }, options || {});
+  var contents;
+
+  if (options.process) {
+    contents = fs.readFileSync(srcpath, options);
+    contents = options.process(contents);
+    exports.writeFileSync(destpath, contents, options);    
+  } else {
+    contents = fs.readFileSync(srcpath);
+    exports.writeFileSync(destpath, contents);
+  }
+};
+
+/**
+ * @description
  * Recurse into a directory, executing callback for each file and folder
  * if the filename is undefiend, the callback is for folder, otherwise for file.
  * and it is asynchronous
@@ -189,14 +192,14 @@ exports.recurse = function(dirpath, filter, callback) {
         var filepath = path.join(dirpath, filename);
 
         fs.stat(filepath, function(err, stats) {
+            var relative = path.relative(rootpath, filepath);
+            var flag = filterCb(relative);
+
             if (stats.isDirectory()) {
               recurse(filepath);
-              callback(filepath);
+              if (flag) callback(filepath);
             } else {
-              var relative = path.relative(rootpath, filepath);
-              if (filterCb(relative)) {
-                callback(filepath, filename);
-              }
+              if (flag) callback(filepath, filename);
             }
           });
         });
@@ -227,15 +230,14 @@ exports.recurseSync = function(dirpath, filter, callback) {
       fs.readdirSync(dirpath).forEach(function(filename) {
         var filepath = path.join(dirpath, filename);
         var stats = fs.statSync(filepath);
+        var relative = path.relative(rootpath, filepath);
+        var flag = filterCb(relative);
 
         if (stats.isDirectory()) {
           recurse(filepath);
-          callback(filepath);
+          if (flag) callback(filepath);
         } else {
-          var relative = path.relative(rootpath, filepath);
-          if (filterCb(relative)) {
-            callback(filepath, filename);
-          }
+          if (flag) callback(filepath, filename);
         }
       });
     } catch(e) {
@@ -252,25 +254,18 @@ exports.recurseSync = function(dirpath, filter, callback) {
  * Remove folder and files in folder, but it's synchronous
  * @example
  * file.rmdirSync('path');
- * file.rmdirSync('path/file.txt');
  */
 exports.rmdirSync = function(dirpath) {
-  var stats = fs.statSync(dirpath);
+  exports.recurseSync(dirpath, function(filepath, filename) {
+    // it is file, otherwise it's folder
+    if (filename) {
+      fs.unlinkSync(filepath);
+    } else {
+      fs.rmdirSync(filepath);
+    }
+  });
 
-  if (stats.isFile()) {
-    fs.unlinkSync(dirpath);
-  } else {
-    exports.recurseSync(dirpath, function(filepath, filename) {
-      // it is file, otherwise it's folder
-      if (filename) {
-        fs.unlinkSync(filepath);
-      } else {
-        fs.rmdirSync(filepath);
-      }
-    });
-
-    fs.rmdirSync(dirpath);
-  }
+  fs.rmdirSync(dirpath);
 };
 
 /**
@@ -285,101 +280,81 @@ exports.rmdirSync = function(dirpath) {
  * file.copySync('path', 'dest', { process: function(contents, filepath) {} }, noProcess: ['']);
  */
 exports.copySync = function(dirpath, destpath, options) {
-  var defaults = {
+  options = util.extend({
     encoding: 'utf8',
     filter: null,
     noProcess: ''
-  };
-  options = util.extend(defaults, options || {});
-  var folders = [];
+  }, options || {});
   var files = [];
+  var folders = [];
 
   exports.recurseSync(dirpath, options.filter, function(filepath, filename) {
-    if (filename) {
-      files.push(filepath);
-    } else {
-      folders.push(filepath);
-    }
+    if (!filename) return;
+    files.push(filepath);
+    folders.push(path.dirname(filepath));
   });
 
-  // Clear empty folder
-  if (options.clear) {
-    folders = folders.filter(function(item) {
-      var length = files.length;
-      while(length--) {
-        if (path.dirname(files[length]) === item) return true;
-      }
-      return false;
-    });
-  }
-
-  folders = folders.filter(function(item, index) {
-    var length = folders.length;
-
-    while(length--) {
-      var newItem = folders[length];
-      var isSubdir = newItem.indexOf(item) === 0;
-      var notSamelevel = newItem.split(path.sep).length != item.split(path.sep).length;
-
-      if (isSubdir && notSamelevel) {
-        return false;
-      }
-    }
-
-    return true;
-  });
-
-  // if dirpath don't exists folder
-  if (!folders.length) {
-    exports.mkdirSync(destpath);
-  }
-
-  // first create dir
-  folders.forEach(function(folder) {
-    var relative = path.relative(dirpath, folder);
-
-    exports.mkdirSync(path.join(destpath, relative));
-  });
-
+  var length = files.length;
   var noProcessCb = fileMatch(options.noProcess);
-  
-  // write file
-  files.forEach(function(filepath) {
-    var encoding = options.encoding;
-    var process = options.process;
-    var relative = path.relative(dirpath, filepath);
-    
-    if (!options.process) {
-      encoding = null;
-    }
 
-    // Skip not process files
-    if (noProcessCb(relative)) {
-      encoding = null;
-      process = null;
-    }
+  // Make sure dest root
+  exports.mkdirSync(destpath);
+  // First create folder for file
+  folders.forEach(function(item, index) {
+    var isCreate = true;
+    var relative, newpath;
 
-    var contents = fs.readFileSync(filepath, {
-      encoding: encoding
-    });
-
-    if (process) {
-      var result = process(contents, filepath);
-      // change file formate
-      if (util.isString(result)) {
-        contents = result;
-      } else {
-        contents = result.contents;
-        relative = path.relative(dirpath, result.filepath);
+    while(index++ < length) {
+      if (folders[index] === item) {
+        isCreate = false;
+        break;
       }
     }
 
-    var newPath = path.join(destpath, relative);
+    if (isCreate) {
+      relative = path.relative(dirpath, item);
+      if (relative) {
+        newpath = path.join(destpath, relative);
+        exports.mkdirSync(newpath);
+      }
+    }
+  });
 
-    fs.writeFileSync(newPath, contents, {
-      encoding: encoding
-    });
-  }); 
+  function copy(oldpath, newpath, options) {
+    var result;
+    if (options.process) {
+      var encoding = {
+        encoding: options.encoding
+      };
+      result = fs.readFileSync(oldpath, encoding);
+      result = options.process(result, oldpath);
+
+      if (util.isObject(result) && result.filepath) {
+        fs.writeFileSync(result.filepath, result.contents, encoding);
+      } else {
+        fs.writeFileSync(newpath, result, encoding);
+      }
+    } else {
+      result = fs.readFileSync(oldpath);
+      fs.writeFileSync(newpath, result);
+    }
+  }
+
+  // Copy file
+  files.forEach(function(item) {
+    var relative = path.relative(dirpath, item);
+    var newpath = path.join(destpath, relative);
+
+    if (options.process) {
+      if (noProcessCb(relative)) {
+        copy(item, newpath, {});
+      } else {
+        copy(item, newpath, options);
+      }
+    } else {
+      copy(item, newpath, {});
+    }
+  });
 };
 
 function base64(filename, data) {

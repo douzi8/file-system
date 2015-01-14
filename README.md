@@ -41,6 +41,17 @@ The api is same as node's writeFile
 ### file.fileMatch
 The api equal [file-match](https://github.com/douzi8/file-match)
 
+### file.copyFileSync
+Copy a file into newpath
+```js
+file.copyFileSync('demo.png', 'dest/demo.png');
+file.copyFileSync('demo.css', 'dest/demo.css', {
+  process: function(contents) {
+    return contents;
+  }
+})
+```
+
 ### file.recurse
 Recurse into a directory, executing callback for each file and folder.
 if the filename is undefiend, the callback is for folder, otherwise for file.
@@ -82,10 +93,8 @@ file.recurseSync('path', ['**/*.js', 'path/**/*.html'], function(filepath, filen
 
 ### file.rmdirSync
 Recurse into a directory, remove all of the files and folder in this directory.
-it also can delete file.
 ```js
 file.rmdirSync('path');
-file.rmdirSync('path/file.txt');
 ```
 
 ### file.copySync
@@ -116,8 +125,7 @@ file.copySync('path', 'path', { filter: ['*.html.js'], process: function(content
 options
 * filter
 * process
-* clear [clear = false]  
-Should clear empty folder
+* noProcess
 
 ### file.base64
 Read image file, callback with base64 data

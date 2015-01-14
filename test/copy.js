@@ -29,35 +29,35 @@ describe('copy', function() {
     });
   });
 
-  it('copySync files with filter', function() {
-    var dirpath = getPath('var/copy/simple');
-    var destpath = getPath('var/copy/simpledest');
+  // it('copySync files with filter', function() {
+  //   var dirpath = getPath('var/copy/simple');
+  //   var destpath = getPath('var/copy/simpledest');
 
-    file.copySync(dirpath, destpath, {
-      filter: [
-        '**/*.js',
-        '1/**/*.css',
-        '1/demo.html'
-      ]
-    });
+  //   file.copySync(dirpath, destpath, {
+  //     filter: [
+  //       '**/*.js',
+  //       '1/**/*.css',
+  //       '1/demo.html'
+  //     ]
+  //   });
 
-    var dirDest = [
-      getPath('var/copy/simpledest/1/demo.html'),
-      getPath('var/copy/simpledest/1/demo.css'),
-      getPath('var/copy/simpledest/1/2/demo.css'),
-      getPath('var/copy/simpledest/1/demo.js'),
-      getPath('var/copy/simpledest/demo.js')
-    ];
-    var result = [];
+  //   var dirDest = [
+  //     getPath('var/copy/simpledest/1/demo.html'),
+  //     getPath('var/copy/simpledest/1/demo.css'),
+  //     getPath('var/copy/simpledest/1/2/demo.css'),
+  //     getPath('var/copy/simpledest/1/demo.js'),
+  //     getPath('var/copy/simpledest/demo.js')
+  //   ];
+  //   var result = [];
 
-    file.recurseSync(destpath, function(filepath, filename) {
-      if (!filename) return;
+  //   file.recurseSync(destpath, function(filepath, filename) {
+  //     if (!filename) return;
 
-      result.push(filepath);
-    });
+  //     result.push(filepath);
+  //   });
 
-    assert.equal(result.length, dirDest.length);
-  });
+  //   assert.equal(result.length, dirDest.length);
+  // });
 
   it('copySync replace filepath', function() {
     var dirpath = getPath('var/copy/simple');
@@ -66,22 +66,24 @@ describe('copy', function() {
     file.copySync(dirpath, destpath, {
       process: function(contents, filepath) {
         var basename = path.basename(filepath);
+        var relative = path.relative(dirpath, filepath);
+        var newpath = path.join(destpath, relative);
 
         // Replace html to txt
-        filepath = filepath.replace(
+        newpath = newpath.replace(
           /\.html$/,
           '.txt'
         );
 
         // Move all css to rootpath of destpath
         if (/\.css$/.test(basename)) {
-          var prefix = path.basename(path.dirname(filepath));
-          filepath = path.join(destpath, prefix + '-' + basename);
+          var prefix = path.basename(path.dirname(newpath));
+          newpath = path.join(destpath, prefix + '-' + basename);
         }
 
         return {
           contents: contents,
-          filepath: filepath
+          filepath: newpath
         };
       }
     });
@@ -130,35 +132,8 @@ describe('copy', function() {
     assert.equal('a',  content);
   });
 
-  it('copySync with clear true', function() {
-    var clearFiles = [
-      getPath('var/copy-clear/1/1.html'),
-      getPath('var/copy-clear/1/111'),
-      getPath('var/copy-clear/2'),
-      getPath('var/copy-clear/1/11/11.html'),
-      getPath('var/copy-clear/1/11/11')
-    ];
-
-    clearFiles.forEach(function(item) {
-      if (/\.\w+$/.test(item)) {
-        file.writeFileSync(item);
-      } else {
-        file.mkdirSync(item);
-      }
-    });
-
-    file.copySync(getPath('var/copy-clear'), getPath('var/copy-clear-dest'), {
-      clear: true
-    });
-
-    assert.equal(false, file.existsSync(getPath('var/copy-clear-dest/2')));
-    assert.equal(false, file.existsSync(getPath('var/copy-clear-dest/1/11/11')));
-    assert.equal(false, file.existsSync(getPath('var/copy-clear-dest/1/111')));
-  });
 
   after(function() {
-    file.rmdirSync(getPath('var/copy'));
-    file.rmdirSync(getPath('var/copy-clear'));
-    file.rmdirSync(getPath('var/copy-clear-dest'));
+   file.rmdirSync(getPath('var/copy'));
   });
 });
