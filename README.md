@@ -3,11 +3,11 @@
 
 This module make file opertaion apis simple, you don't need to care the dir exits. and the api is same as node's filesystem. This is no exists time cost for this plugin.  
 ```js
-var file = require('file-system');
+var fs = require('file-system');
 
-file.mkdir('1/2/3/4/5', [mode], function(err) {});
-file.mkdirSync('1/2/3/4/5', [mode]);
-file.writeFile('path/test.txt', 'aaa', function(err) {})
+fs.mkdir('1/2/3/4/5', [mode], function(err) {});
+fs.mkdirSync('1/2/3/4/5', [mode]);
+fs.writeFile('path/test.txt', 'aaa', function(err) {})
 ```
 
 ### install
@@ -16,60 +16,69 @@ npm install file-system --save
 ```
 
 ## API
-### file.fs
+### .fs
 file extend node fs origin methods, and overwrite some methods with next list chart
-if you want to use origin method, choose file.fs[method]
+```js
+var file = require('file-system');
+var fs = require('fs');
 
+file.readFile === fs.readFile // true
 ```
-file.existsSync === file.fs.existsSync    // true
 
-file.fs.mkdirSync       // orign method
-```
-
-### file.mkdir
+### .mkdir
 The api is same as node's mkdir
 
-### file.mkdirSync
+### .mkdirSync
 The api is same as node's mkdir
 
-### file.writeFile
+### .writeFile
 The api is same as node's writeFile
 
-### file.writeFileSync
+### .writeFileSync
 The api is same as node's writeFile
 
-### file.fileMatch
+### .fileMatch
 The api equal [file-match](https://github.com/douzi8/file-match)
       
-### file.copyFile
+### .copyFile(srcpath, destpath, options)
 Asynchronously copy a file into newpath
-```
-file.copyFile('deom.png', 'dest/demo.png', {
-  done: function() {
+* {string} ``srcpath`` required
+* {string} ``destpath`` required
+* {object} ``options``
+  * {string} ``options.encoding`` [options.encoding=utf8]
+  * {function} ``options.done(err)``
+  * {function} ``options.process(content)``  
+  The process argument must return processed content
+```js
+fs.copyFile('deom.png', 'dest/demo.png', {
+  done: function(err) {
     console.log('done');
   }
 });
 ```
 
-### file.copyFileSync
-Copy a file into newpath
+### .copyFileSync(srcpath, destpath, options)
+The api same as copyFile, but it's synchronous
 ```js
-file.copyFileSync('demo.png', 'dest/demo.png');
-file.copyFileSync('demo.css', 'dest/demo.css', {
+fs.copyFileSync('demo.png', 'dest/demo.png');
+fs.copyFileSync('demo.css', 'dest/demo.css', {
   process: function(contents) {
     return contents;
   }
 })
 ```
 
-### file.recurse
+### .recurse(dirpath, filter, callback)
 Recurse into a directory, executing callback for each file and folder.
 if the filename is undefiend, the callback is for folder, otherwise for file.
-And you can pass filter params for filter file.
+* {string} ``dirpath`` required
+* {string|array|function} ``filter``  
+If the filter is function, executing callback for all files and folder 
+* {function} ``callback(filepath, filename)``
 ```js
-file.recurse('path', function(filepath, filename) { });
+fs.recurse('path', function(filepath, filename) { });
 
-file.recurse('path', [
+fs.recurse('path', [
   '*.css',
   '**/*.js', 
   'path/*.html',
@@ -83,45 +92,52 @@ file.recurse('path', [
 });
 
 //  Only using files
-file.recurse('path', function(filepath, filename) {  
+fs.recurse('path', function(filepath, filename) {  
   if (!filename) return;
 });
 ```
 [filter params description](https://github.com/douzi8/file-match#filter-description)
 
-### file.recurseSync
-Same as recurse, but it is synchronous
+### .recurseSync(dirpath, filter, callback)
+The api is same as recurse, but it is synchronous
 ```js
-file.recurseSync('path', function(filepath, filename) {
+fs.recurseSync('path', function(filepath, filename) {
   
 });
 
-file.recurseSync('path', ['**/*.js', 'path/**/*.html'], function(filepath, filename) {
+fs.recurseSync('path', ['**/*.js', 'path/**/*.html'], function(filepath, filename) {
   
 });
 ```
 
-### file.rmdirSync
+### .rmdirSync(dirpath)
 Recurse into a directory, remove all of the files and folder in this directory.
 ```js
-file.rmdirSync('path');
+fs.rmdirSync('path');
 ```
 
-### file.copySync
+### .copySync(dirpath, destpath, options)
 Recurse into a directory, copy all files into dest.
-Pass options filter params to filter files.
-if you want to change the dest filepath, process callback return { contents: '', filepath: ''},
-otherwise only change contents.
+* {string} ``dirpath`` required
+* {string} ``destpath`` required
+* {object} ``options``
+  * {string|array} ``options.filter``
+  * {function} ``options.process(contents, filepath)``  
+  If custom the destpath, return object, otherwise return content
+  * {string|array} ``options.noProcess``
 ```js
-file.copySync('path', 'dest', { clear: true });
+fs.copySync('path', 'dest', { clear: true });
 
-file.copySync('src', 'dest/src');
+fs.copySync('src', 'dest/src');
 
-file.copySync('src', 'dest/src', { filter: ['*.js', 'path/**/*.css'] });
+fs.copySync('src', 'dest/src', { filter: ['*.js', 'path/**/*.css'] });
 
-file.copySync('path', 'dest', { 
+fs.copySync('path', 'dest', { 
   noProcess: '**/*.{jpg, png}',            // Don't process images
   process: function(contents, filepath) {
+    // only process file content
+    return contents;
+    // or custom destpath
     return {
       contents: '',
       filepath: ''
@@ -130,21 +146,10 @@ file.copySync('path', 'dest', {
 });
 
 //Handler self files
-file.copySync('path', 'path', { filter: ['*.html.js'], process: function(contents, filepath) {} });
+fs.copySync('path', 'path', { filter: ['*.html.js'], process: function(contents, filepath) {} });
 ```
-options
-* filter
-* process
-* noProcess
 
-### file.base64
-Read image file, callback with base64 data
-```js
-file.base64('img.png', function(err, data) {
-  
-});
-```
-### file.base64Sync
-```js
-var base64 = file.base64Sync('img.png');
-```
+### .base64
+Deprecated, move to [base64](https://github.com/douzi8/base64-img#base64filename-callback)
+### .base64Sync
+Deprecated, move to [base64Sync](https://github.com/douzi8/base64-img#base64syncfilename)

@@ -1,5 +1,5 @@
 var assert = require("assert");
-var file = require('../index');
+var file = require('../file-system');
 var fs = require('fs');
 var path = require('path');
 

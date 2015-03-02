@@ -1,8 +1,8 @@
 {
   "name": "file-system",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Strengthen the ability of file system",
-  "main": "index.js",
+  "main": "file-system.js",
   "scripts": {
     "test": "mocha test"
   },
@@ -17,8 +17,8 @@
     "fs",
     "maker",
     "node file",
-    "base64",
-    "mkdir"
+    "mkdir",
+    "rmdir"
   ],
   "author": "douzi <liaowei08@gmail.com>",
   "license": "ISC",
