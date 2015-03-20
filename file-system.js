@@ -188,7 +188,13 @@ exports.copyFileSync = function(srcpath, destpath, options) {
 
   if (options.process) {
     contents = fs.readFileSync(srcpath, options);
-    contents = options.process(contents);
+    contents = options.process(contents, srcpath);
+
+    if (util.isObject(contents) && contents.filepath) {
+      destpath = contents.filepath;
+      contents = contents.contents;
+    }
+
     exports.writeFileSync(destpath, contents, options);    
   } else {
     contents = fs.readFileSync(srcpath);
@@ -314,74 +320,21 @@ exports.copySync = function(dirpath, destpath, options) {
     filter: null,
     noProcess: ''
   }, options || {});
-  var files = [];
-  var folders = [];
-
-  exports.recurseSync(dirpath, options.filter, function(filepath, filename) {
-    if (!filename) return;
-    files.push(filepath);
-    folders.push(path.dirname(filepath));
-  });
-
-  var length = files.length;
   var noProcessCb = fileMatch(options.noProcess);
 
   // Make sure dest root
   exports.mkdirSync(destpath);
-  // First create folder for file
-  folders.forEach(function(item, index) {
-    var isCreate = true;
-    var relative, newpath;
-
-    while(index++ < length) {
-      if (folders[index] === item) {
-        isCreate = false;
-        break;
-      }
-    }
-
-    if (isCreate) {
-      relative = path.relative(dirpath, item);
-      if (relative) {
-        newpath = path.join(destpath, relative);
-        exports.mkdirSync(newpath);
-      }
-    }
-  });
-
-  function copy(oldpath, newpath, options) {
-    var result;
-    if (options.process) {
-      var encoding = {
-        encoding: options.encoding
-      };
-      result = fs.readFileSync(oldpath, encoding);
-      result = options.process(result, oldpath);
-
-      if (util.isObject(result) && result.filepath) {
-        fs.writeFileSync(result.filepath, result.contents, encoding);
-      } else {
-        fs.writeFileSync(newpath, result, encoding);
-      }
-    } else {
-      result = fs.readFileSync(oldpath);
-      fs.writeFileSync(newpath, result);
-    }
-  }
-
-  // Copy file
-  files.forEach(function(item) {
-    var relative = path.relative(dirpath, item);
+  exports.recurseSync(dirpath, options.filter, function(filepath, filename) {
+    if (!filename) return;
+    var relative = path.relative(dirpath, filepath);
     var newpath = path.join(destpath, relative);
+    var opts = {};
 
-    if (options.process) {
-      if (noProcessCb(relative)) {
-        copy(item, newpath, {});
-      } else {
-        copy(item, newpath, options);
-      }
-    } else {
-      copy(item, newpath, {});
+    if (options.process && !noProcessCb(relative)) {
+      opts.encoding = options.encoding;
+      opts.process = options.process;
     }
+
+    exports.copyFileSync(filepath, newpath, opts);
   });
 };

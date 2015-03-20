@@ -3,7 +3,6 @@ module.exports = function(grunt) {
   grunt.initConfig({
     jshint: {
       all: [
-        'test/**/*.js',
         'vendor/**/*.js',
         './*.js',
         '!./test.js'

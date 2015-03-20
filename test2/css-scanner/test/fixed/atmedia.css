@@ -1,0 +1,11 @@
+@media (max-device-width: 480px) and (orientation: landscape) {
+  body {
+    background-color: red;
+  }
+
+  h1 {
+    font-size: 15px
+  }
+}
+
+333

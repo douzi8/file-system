@@ -1,0 +1,43 @@
+{
+  "name": "file-match",
+  "version": "1.0.1",
+  "description": "Match filepath is validated, or exclude filepath that don't need.",
+  "main": "file-match.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/douzi8/file-match"
+  },
+  "keywords": [
+    "filepath",
+    "match",
+    "minimatch",
+    "grunt filematch"
+  ],
+  "author": {
+    "name": "douzi",
+    "email": "liaowei08@gmail.com"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.10.0",
+    "mocha": "^2.0.1"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/douzi8/file-match/issues"
+  },
+  "dependencies": {
+    "utils-extend": "^1.0.6"
+  },
+  "readme": "file-match\n==========\n\nMatch filepath is validated, or exclude filepath that don't need\n\n```js\nvar fileMatch = require('file-match');\n\nvar filter = fileMatch('*.js');\n\nfilter('a.js');            // true\nfilter('path/a.js');       // false\n\nvar filter = fileMatch([\n  '**/*',\n  '!path/*.js'\n  '!img/**/.{jpg,png,gif}'\n]);\n\nfilter('src/demo.js')           // true\nfilter('path/demo.js')          // false\nfilter('path/path/demo.js')     // true\nfilter('img/demo.png')          // false\nfilter('img/path/demo.png')     // false\n```\n\nIf the filter value is empty string or empty arry, it will always return false,\nif it's ``null``, will always return true.",
+  "readmeFilename": "README.md",
+  "gitHead": "129a695b6e406d7a40e3777f5a646077e7d20a9e",
+  "homepage": "https://github.com/douzi8/file-match",
+  "_id": "file-match@1.0.1",
+  "_shasum": "9af60638fe6826c41b8320e7b0849c7aba7263b2",
+  "_from": "file-match@"
+}
+333

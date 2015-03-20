@@ -1,0 +1,21 @@
+html
+  head
+    link(href='/assets/css/style.css')
+  body
+    h2 form upload
+    form(action='/upload', method='post', enctype="multipart/form-data")
+      input(type='file', name='img')
+      br
+      input(type='text', name='txt1')
+      br
+      input(type='submit')
+    h2 ajax upload
+    form(action='/upload', method='post', enctype='multipart/form-data', id='fileupload')
+      input(type='file', name='files[]', multiple)
+    script(src='/js/jquery.js')
+    script(src='/js/jquery.ui.widget.js')
+    script(src='/js/jquery.fileupload.js')
+    script(src='/js/jquery.iframe-transport.js')
+    script(src='/js/jquery.fileupload-process.js')
+    script(src='/js/jquery.fileupload-validate.js')
+    script(src='/js/main.js')333

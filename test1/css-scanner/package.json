@@ -1,0 +1,34 @@
+{
+  "name": "css-scanner",
+  "version": "1.0.0",
+  "description": "Scanner for css element",
+  "main": "css-scanner.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/douzi8/css-scanner.git"
+  },
+  "keywords": [
+    "css",
+    "cssdom",
+    "css scanner"
+  ],
+  "author": {
+    "name": "douzi",
+    "email": "liaowei08@gmail.com"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/douzi8/css-scanner/issues"
+  },
+  "homepage": "https://github.com/douzi8/css-scanner",
+  "readme": "# css-scanner\nScanner for css element, refer to [w3c css](http://www.w3schools.com/cssref/default.asp)\n```js\nvar CssScanner = require('css-scanner');\n```\n## install\n```\nnpm install css-scanner --save\n```\n\n### test\n```\nmocha\n```\n\n## API\n### CssScanner(str, filepath)\nCssScanner is inherit to ``Writable stream``.\n* {string|undefined} ``str``  \n  The css code string or empty\n* {string} ``filepath``  \n  it's useful for see error message.\n```js\nvar css = new CssScanner('a{color:red;}');\n\n// or use pipe\nvar css = new CssScanner();\nfs.createReadStream('path/bootstrap.css').pipe(css);\n```\n\n### on\ninherit the System events module. List emit event name\n* ``comment``  \n* ``rule``  \n* ``@meida``  \nif the name is undefined, it's means media close, otherwise media open\n* ``@keyframes``  \nif the name is undefined, it's means keyframes close, otherwise keyframes open\n* ``@import``\n* ``@charset``\n\n```js\ncss.on('comment', function(match) {\n  \n});\n\ncss.on('rule', function(rule) {\n  // rule: { selector: [], declaration: [{ property: '', value: ''}] }\n});\n\ncss.on('@media', function(name) {\n  // name -> string\n  if (name) {\n    // open\n\n  } else {\n    // close\n  }\n});\n\ncss.on('@keyframes', function(name) {\n  // name -> { vendor: '', name: '' }\n});\n\ncss.on('@import', function(name) {\n  \n});\n\ncss.on('@charset', function(name) {\n});\n```\n\n### scanner()\nStart to scanner\n```js\n// string\ncss.scanner();\n\n// pipe\ncss.on('finish', function() {\n  this.scanner();\n});\n```\n",
+  "readmeFilename": "README.md",
+  "gitHead": "120ac4b946cd613519a6304be9d09deec13038a4",
+  "_id": "css-scanner@1.0.0",
+  "_shasum": "bbe596ba3d0337e2c68ecafe7e84a31f81bc94ac",
+  "_from": "css-scanner@"
+}
+333
