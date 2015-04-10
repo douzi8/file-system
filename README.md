@@ -122,7 +122,7 @@ Recurse into a directory, copy all files into dest.
 * {string} ``destpath`` required
 * {object} ``options``
   * {string|array} ``options.filter``
-  * {function} ``options.process(contents, filepath)``  
+  * {function} ``options.process(contents, filepath, relative)``  
   If custom the destpath, return object, otherwise return content
   * {string|array} ``options.noProcess``
 ```js
@@ -134,7 +134,7 @@ fs.copySync('src', 'dest/src', { filter: ['*.js', 'path/**/*.css'] });
 
 fs.copySync('path', 'dest', { 
   noProcess: '**/*.{jpg, png}',            // Don't process images
-  process: function(contents, filepath) {
+  process: function(contents, filepath, relative) {
     // only process file content
     return contents;
     // or custom destpath

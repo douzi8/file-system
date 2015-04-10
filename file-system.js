@@ -188,7 +188,7 @@ exports.copyFileSync = function(srcpath, destpath, options) {
 
   if (options.process) {
     contents = fs.readFileSync(srcpath, options);
-    contents = options.process(contents, srcpath);
+    contents = options.process(contents, srcpath, options.relative);
 
     if (util.isObject(contents) && contents.filepath) {
       destpath = contents.filepath;
@@ -328,7 +328,9 @@ exports.copySync = function(dirpath, destpath, options) {
     if (!filename) return;
     var relative = path.relative(dirpath, filepath);
     var newpath = path.join(destpath, relative);
-    var opts = {};
+    var opts = {
+      relative: relative
+    };
 
     if (options.process && !noProcessCb(relative)) {
       opts.encoding = options.encoding;
