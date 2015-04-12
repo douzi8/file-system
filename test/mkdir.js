@@ -70,6 +70,7 @@ describe('mkdir', function() {
   });
 
   after(function() {
+    file.chmodSync(getPath('var/mkdir/mode2'), 511);
     file.rmdirSync(getPath('var/mkdir'));
   });
 });

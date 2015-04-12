@@ -260,25 +260,19 @@ exports.recurseSync = function(dirpath, filter, callback) {
   var rootpath = dirpath;
 
   function recurse(dirpath) {
-    // permission bug
-    try {
-      fs.readdirSync(dirpath).forEach(function(filename) {
-        var filepath = path.join(dirpath, filename);
-        var stats = fs.statSync(filepath);
-        var relative = path.relative(rootpath, filepath);
-        var flag = filterCb(relative);
+    fs.readdirSync(dirpath).forEach(function(filename) {
+      var filepath = path.join(dirpath, filename);
+      var stats = fs.statSync(filepath);
+      var relative = path.relative(rootpath, filepath);
+      var flag = filterCb(relative);
 
-        if (stats.isDirectory()) {
-          recurse(filepath);
-          if (flag) callback(filepath);
-        } else {
-          if (flag) callback(filepath, filename);
-        }
-      });
-    } catch(e) {
-      fs.chmodSync(dirpath, 511);
-      recurse(dirpath);
-    }
+      if (stats.isDirectory()) {
+        recurse(filepath);
+        if (flag) callback(filepath);
+      } else {
+        if (flag) callback(filepath, filename);
+      }
+    });
   }
 
   recurse(dirpath);

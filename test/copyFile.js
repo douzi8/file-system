@@ -36,13 +36,14 @@ describe('copy file', function() {
       });
     });
 
-    it('copy image', function() {
+    it('copy image', function(done) {
       var oldpath = getPath('test.png');
       var newpath = getPath('var/copy-file/test.async.dest.png');
 
       file.copyFile(oldpath, newpath, {
         done: function() {
           assert.equal(file.readFileSync(oldpath).length, file.readFileSync(newpath).length);
+          done();
         }
       });
     });
