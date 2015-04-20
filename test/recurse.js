@@ -46,7 +46,7 @@ describe('recurse', function() {
     var filesPath = allFiles[0];
     var count = 0;
 
-    file.recurse(getPath('var/recurse/simple'), function(filepath, filename) {
+    file.recurse(getPath('var/recurse/simple'), function(filepath, relative, filename) {
       if (filename) {
         assert.equal(true, filesPath.indexOf(filepath) != -1);
         
@@ -59,7 +59,7 @@ describe('recurse', function() {
 
   it('recurseSync files', function() {
     var filesPath = [];
-    file.recurseSync(getPath('var/recurse/filter'), function(filepath, filename) {
+    file.recurseSync(getPath('var/recurse/filter'), function(filepath, relative, filename) {
       if (filename) {
         filesPath.push(filepath);
       }
@@ -92,7 +92,7 @@ describe('recurse', function() {
 
     file.copySync(getPath('var/recurse/copy'), dest);
 
-    file.recurseSync(dest, function(filepath, filename) {
+    file.recurseSync(dest, function(filepath, relative, filename) {
       if (!filename) return;
 
       destFiles.push(filepath);

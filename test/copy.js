@@ -50,7 +50,7 @@ describe('copy', function() {
     ];
     var result = [];
 
-    file.recurseSync(destpath, function(filepath, filename) {
+    file.recurseSync(destpath, function(filepath, relative,filename) {
       if (!filename) return;
 
       result.push(filepath);

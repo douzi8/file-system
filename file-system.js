@@ -209,7 +209,7 @@ exports.copyFileSync = function(srcpath, destpath, options) {
  * and it is asynchronous
  * @example
  * file.recurse('path', function(filepath, filename) { });
- * file.recurse('path', ['*.js', 'path/**\/*.html'], function(filepath, filename) { });
+ * file.recurse('path', ['*.js', 'path/**\/*.html'], function(filepath, relative, filename) { });
  */
 exports.recurse = function(dirpath, filter, callback) {
   if (util.isFunction(filter)) {
@@ -232,9 +232,9 @@ exports.recurse = function(dirpath, filter, callback) {
 
             if (stats.isDirectory()) {
               recurse(filepath);
-              if (flag) callback(filepath);
+              if (flag) callback(filepath, relative);
             } else {
-              if (flag) callback(filepath, filename);
+              if (flag) callback(filepath, relative, filename);
             }
           });
         });
@@ -249,7 +249,7 @@ exports.recurse = function(dirpath, filter, callback) {
  * Same as recurse, but it is synchronous
  * @example
  * file.recurseSync('path', function(filepath, filename) {});
- * file.recurseSync('path', ['*.js', 'path/**\/*.html'], function(filepath, filename) {});
+ * file.recurseSync('path', ['*.js', 'path/**\/*.html'], function(filepath, relative, filename) {});
  */
 exports.recurseSync = function(dirpath, filter, callback) {
   if (util.isFunction(filter)) {
@@ -268,9 +268,9 @@ exports.recurseSync = function(dirpath, filter, callback) {
 
       if (stats.isDirectory()) {
         recurse(filepath);
-        if (flag) callback(filepath);
+        if (flag) callback(filepath, relative);
       } else {
-        if (flag) callback(filepath, filename);
+        if (flag) callback(filepath, relative, filename);
       }
     });
   }
@@ -285,7 +285,7 @@ exports.recurseSync = function(dirpath, filter, callback) {
  * file.rmdirSync('path');
  */
 exports.rmdirSync = function(dirpath) {
-  exports.recurseSync(dirpath, function(filepath, filename) {
+  exports.recurseSync(dirpath, function(filepath, relative, filename) {
     // it is file, otherwise it's folder
     if (filename) {
       fs.unlinkSync(filepath);
@@ -318,9 +318,8 @@ exports.copySync = function(dirpath, destpath, options) {
 
   // Make sure dest root
   exports.mkdirSync(destpath);
-  exports.recurseSync(dirpath, options.filter, function(filepath, filename) {
+  exports.recurseSync(dirpath, options.filter, function(filepath, relative, filename) {
     if (!filename) return;
-    var relative = path.relative(dirpath, filepath);
     var newpath = path.join(destpath, relative);
     var opts = {
       relative: relative

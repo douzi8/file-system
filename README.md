@@ -74,16 +74,16 @@ if the filename is undefiend, the callback is for folder, otherwise for file.
 * {string} ``dirpath`` required
 * {string|array|function} ``filter``  
 If the filter is function, executing callback for all files and folder 
-* {function} ``callback(filepath, filename)``
+* {function} ``callback(filepath, filename, relative)``
 ```js
-fs.recurse('path', function(filepath, filename) { });
+fs.recurse('path', function(filepath, relative, filename) { });
 
 fs.recurse('path', [
   '*.css',
   '**/*.js', 
   'path/*.html',
   '!**/path/*.js'
-], function(filepath, filename) {  
+], function(filepath, relative, filename) {  
   if (filename) {
   // it's file
   } else {
@@ -92,7 +92,7 @@ fs.recurse('path', [
 });
 
 //  Only using files
-fs.recurse('path', function(filepath, filename) {  
+fs.recurse('path', function(filepath, relative, filename) {  
   if (!filename) return;
 });
 ```
@@ -101,11 +101,11 @@ fs.recurse('path', function(filepath, filename) {
 ### .recurseSync(dirpath, filter, callback)
 The api is same as recurse, but it is synchronous
 ```js
-fs.recurseSync('path', function(filepath, filename) {
+fs.recurseSync('path', function(filepath, relative, filename) {
   
 });
 
-fs.recurseSync('path', ['**/*.js', 'path/**/*.html'], function(filepath, filename) {
+fs.recurseSync('path', ['**/*.js', 'path/**/*.html'], function(filepath, relative, filename) {
   
 });
 ```
