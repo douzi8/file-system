@@ -2,7 +2,7 @@
  * @fileoverview Strengthen the ability of file system
  * @author wliao <wliao@Ctrip.com> 
  */
-var fs = require('fs');
+var fs = require('graceful-fs');
 var util = require('utils-extend');
 var path = require('path');
 var fileMatch = require('file-match');
