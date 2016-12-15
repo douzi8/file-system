@@ -1,7 +1,7 @@
 var assert = require("assert");
 var file = require('../file-system');
 var path = require('path');
-var fs = require('fs');
+var fs = require('graceful-fs');
 
 function getPath(filepath) {
   return path.join(__dirname, filepath);
