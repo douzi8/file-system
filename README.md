@@ -1,7 +1,7 @@
 # file-system — Simplified file system
 [![NPM](https://nodei.co/npm/file-system.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/file-system/)
 
-This module make file opertaion apis simple, you don't need to care the dir exits. and the api is same as node's filesystem. This is no exists time cost for this plugin.  
+This module makes file opertaion apis simple, so that you don't need to care whether a directory (dir) exits. Also, the api is the same as node's filesystem. There is no existing time cost for this plugin.  
 ```js
 var fs = require('file-system');
 
