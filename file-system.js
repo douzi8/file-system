@@ -2,10 +2,10 @@
  * @fileoverview Strengthen the ability of file system
  * @author wliao <wliao@Ctrip.com> 
  */
-var fs = require('fs');
-var util = require('utils-extend');
-var path = require('path');
-var fileMatch = require('file-match');
+var fs = require('fs'),
+    util = require('utils-extend'),
+    path = require('path'),
+    fileMatch = require('file-match');
 
 function checkCbAndOpts(options, callback) {
   if (util.isFunction(options)) {
@@ -184,7 +184,7 @@ exports.copyFileSync = function(srcpath, destpath, options) {
   options = util.extend({
     encoding: 'utf8' 
   }, options || {});
-  var contents;
+  var contents = {};
 
   if (options.process) {
     contents = fs.readFileSync(srcpath, options);
