@@ -50,7 +50,7 @@ Asynchronously copy a file into newpath
   * {function} ``options.process(content)``  
   The process argument must return processed content
 ```js
-fs.copyFile('deom.png', 'dest/demo.png', {
+fs.copyFile('demo.png', 'dest/demo.png', {
   done: function(err) {
     console.log('done');
   }
