@@ -70,7 +70,7 @@ fs.copyFileSync('demo.css', 'dest/demo.css', {
 
 ### .recurse(dirpath, filter, callback)
 Recurse into a directory, executing callback for each file and folder.
-if the filename is undefiend, the callback is for folder, otherwise for file.
+if the filename is undefined, the callback is for folder, otherwise for file.
 * {string} ``dirpath`` required
 * {string|array|function} ``filter``  
 If the filter is function, executing callback for all files and folder 
